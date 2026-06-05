@@ -213,6 +213,36 @@ function reportContributors(contributors, limit = 15) {
   console.log('');
 }
 
+function reportLanguages(languages) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Language Breakdown\x1b[0m\n');
+  for (const l of languages) {
+    const barLength = Math.round((l.percentage / 100) * 20);
+    const bar = '█'.repeat(barLength) + '░'.repeat(20 - barLength);
+    console.log(`  \x1b[35m${bar}\x1b[0m \x1b[36m${l.language.padEnd(15)}\x1b[0m ${l.percentage}% (${l.changes} changes)`);
+  }
+  console.log('');
+}
+
+function reportTickets(tickets) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Issue Tracker Linkage\x1b[0m\n');
+  
+  let color = '\x1b[32m';
+  if (tickets.linkageRatio < 50) color = '\x1b[33m';
+  if (tickets.linkageRatio < 20) color = '\x1b[31m';
+  
+  console.log(`  Linkage Ratio: ${color}${tickets.linkageRatio}%\x1b[0m`);
+  console.log(`  Linked Commits: \x1b[32m${tickets.linkedCommits}\x1b[0m`);
+  console.log(`  Unlinked Commits: \x1b[31m${tickets.unlinkedCommits}\x1b[0m\n`);
+  
+  if (tickets.topIssues.length > 0) {
+    console.log('  Top Active Issues:');
+    for (const t of tickets.topIssues) {
+      console.log(`    \x1b[36m${t.issue.padEnd(12)}\x1b[0m ${t.count} commits`);
+    }
+  }
+  console.log('');
+}
+
 module.exports = {
   reportHotspots,
   reportBusFactor,
@@ -221,6 +251,8 @@ module.exports = {
   reportRisk,
   reportOwnership,
   reportContributors,
+  reportLanguages,
+  reportTickets,
   generateHtml,
   generateCsv,
   generateMd,

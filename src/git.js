@@ -8,7 +8,7 @@ const { execSync } = require('child_process');
  */
 function getCommits(repoPath, options = {}) {
   try {
-    let cmd = `git log --numstat --format='COMMIT:%H|%an|%aI' --no-merges`;
+    let cmd = `git log --numstat --format='COMMIT:%H|%an|%aI|%s' --no-merges`;
     
     if (options.since) {
       cmd += ` --since="${options.since.replace(/\./g, ' ')}"`;
@@ -38,6 +38,7 @@ function getCommits(repoPath, options = {}) {
           hash: parts[0],
           author: author,
           date: parts[2],
+          message: parts.slice(3).join('|'), // in case subject has pipes
           files: []
         };
         commits.push(currentCommit);

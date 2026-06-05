@@ -129,6 +129,20 @@ switch (command) {
     else reporter.reportContributors(contributors);
     break;
   }
+  case 'languages': {
+    const { analyzeLanguages } = require('../src');
+    const languages = analyzeLanguages(commits);
+    if (options.json) console.log(JSON.stringify(languages, null, 2));
+    else reporter.reportLanguages(languages);
+    break;
+  }
+  case 'tickets': {
+    const { analyzeTickets } = require('../src');
+    const tickets = analyzeTickets(commits);
+    if (options.json) console.log(JSON.stringify(tickets, null, 2));
+    else reporter.reportTickets(tickets);
+    break;
+  }
   case 'hotspots': {
     const hotspots = analyzeHotspots(commits);
     if (options.json) console.log(JSON.stringify(hotspots, null, 2));
@@ -155,7 +169,7 @@ switch (command) {
   }
   case 'help': {
     console.log('\nUsage: reporadar [command] [options]');
-    console.log('Commands: scan | html | hotspots | busfactor | churn | coupling | ownership | contributors');
+    console.log('Commands: scan | html | hotspots | busfactor | churn | coupling | ownership | contributors | languages | tickets');
     console.log('Options:');
     console.log('  --json                        Output results as JSON');
     console.log('  --csv                         Output results as CSV');

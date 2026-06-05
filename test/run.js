@@ -593,8 +593,8 @@ async function main() {
         cwd: projectRoot,
       });
       assert.ok(
-        output.includes('1.2.0'),
-        `--version should output 1.2.0, got: ${output.trim()}`
+        output.includes('2.0.0'),
+        `--version should output 2.0.0, got: ${output.trim()}`
       );
     });
 
