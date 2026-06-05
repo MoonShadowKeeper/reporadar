@@ -1,0 +1,37 @@
+name: 'RepoRadar Risk Scan'
+description: 'Analyzes repository risks (hotspots, bus factor, churn, coupling) and generates a health score.'
+author: 'MoonShadowKeeper'
+inputs:
+  github_token:
+    description: 'GitHub token for posting PR comments'
+    required: false
+  ignore:
+    description: 'Comma-separated patterns to ignore'
+    required: false
+    default: 'package-lock.json,yarn.lock,dist,node_modules'
+  since:
+    description: 'Time window to analyze'
+    required: false
+    default: '1.year'
+runs:
+  using: 'composite'
+  steps:
+    - name: Run RepoRadar
+      shell: bash
+      run: |
+        npx reporadar scan --md --ignore="${{ inputs.ignore }}" --since="${{ inputs.since }}" > reporadar-report.md
+        
+    - name: Post PR Comment
+      if: github.event_name == 'pull_request' && inputs.github_token != ''
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ inputs.github_token }}
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('reporadar-report.md', 'utf8');
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: report
+          });

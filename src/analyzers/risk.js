@@ -16,11 +16,11 @@ function analyzeRisk(hotspots, busfactors, churns, couplings) {
 
   // 1. Hotspots contribution (up to 35 points)
   if (hotspots.length > 0) {
-    const maxHotspot = hotspots[0].commits;
+    const maxHotspotScore = hotspots[0].score || 1;
     for (const h of hotspots) {
-      const score = (h.commits / maxHotspot) * 35;
+      const score = (h.score / maxHotspotScore) * 35;
       fileScores[h.file].riskScore += score;
-      if (score > 10) fileScores[h.file].factors.push(`Hotspot (${h.commits} commits)`);
+      if (score > 10) fileScores[h.file].factors.push(`Hotspot (score: ${h.score}, ${h.commits} commits)`);
     }
   }
 

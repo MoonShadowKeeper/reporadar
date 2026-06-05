@@ -1,0 +1,170 @@
+{
+  "date": "2026-06-05T16:54:44.569Z",
+  "risk": [
+    {
+      "file": "README.md",
+      "riskScore": 87,
+      "factors": [
+        "Hotspot (score: 16.73, 7 commits)",
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (236 changes/month)",
+        "Highly coupled"
+      ],
+      "level": "CRITICAL"
+    },
+    {
+      "file": "src/reporter.js",
+      "riskScore": 71,
+      "factors": [
+        "Hotspot (score: 10.25, 4 commits)",
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (173 changes/month)",
+        "Highly coupled"
+      ],
+      "level": "HIGH"
+    },
+    {
+      "file": "src/analyzers/risk.js",
+      "riskScore": 66,
+      "factors": [
+        "Hotspot (score: 6.9, 2 commits)",
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (565 changes/month)"
+      ],
+      "level": "HIGH"
+    },
+    {
+      "file": "bin/reporadar.js",
+      "riskScore": 65,
+      "factors": [
+        "Hotspot (score: 7.82, 3 commits)",
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (131 changes/month)",
+        "Highly coupled"
+      ],
+      "level": "HIGH"
+    },
+    {
+      "file": "test/run.js",
+      "riskScore": 63,
+      "factors": [
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (685 changes/month)"
+      ],
+      "level": "HIGH"
+    },
+    {
+      "file": "src/analyzers/coupling.js",
+      "riskScore": 62,
+      "factors": [
+        "Hotspot (score: 6.68, 2 commits)",
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (436 changes/month)"
+      ],
+      "level": "HIGH"
+    },
+    {
+      "file": "src/analyzers/churn.js",
+      "riskScore": 61,
+      "factors": [
+        "Hotspot (score: 6.67, 2 commits)",
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (429 changes/month)"
+      ],
+      "level": "HIGH"
+    },
+    {
+      "file": "package.json",
+      "riskScore": 51,
+      "factors": [
+        "Hotspot (score: 6.94, 4 commits)",
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (37 changes/month)"
+      ],
+      "level": "HIGH"
+    },
+    {
+      "file": "src/git.js",
+      "riskScore": 48,
+      "factors": [
+        "Hotspot (score: 5.05, 2 commits)",
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (70 changes/month)"
+      ],
+      "level": "MEDIUM"
+    },
+    {
+      "file": ".gitignore",
+      "riskScore": 46,
+      "factors": [
+        "Hotspot (score: 5.46, 2 commits)",
+        "Bus factor 1 (moonshadowkeeper owns 100%)"
+      ],
+      "level": "MEDIUM"
+    },
+    {
+      "file": ".github/workflows/test.yml",
+      "riskScore": 44,
+      "factors": [
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (35 changes/month)"
+      ],
+      "level": "MEDIUM"
+    },
+    {
+      "file": "src/index.js",
+      "riskScore": 44,
+      "factors": [
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (17 changes/month)"
+      ],
+      "level": "MEDIUM"
+    },
+    {
+      "file": "src/analyzers/busfactor.js",
+      "riskScore": 42,
+      "factors": [
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (53 changes/month)"
+      ],
+      "level": "MEDIUM"
+    },
+    {
+      "file": "src/analyzers/hotspots.js",
+      "riskScore": 41,
+      "factors": [
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (33 changes/month)"
+      ],
+      "level": "MEDIUM"
+    },
+    {
+      "file": "LICENSE",
+      "riskScore": 41,
+      "factors": [
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (21 changes/month)"
+      ],
+      "level": "MEDIUM"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "riskScore": 40,
+      "factors": [
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (17 changes/month)"
+      ],
+      "level": "MEDIUM"
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "riskScore": 40,
+      "factors": [
+        "Bus factor 1 (moonshadowkeeper owns 100%)",
+        "Turbulent churn (16 changes/month)"
+      ],
+      "level": "MEDIUM"
+    }
+  ],
+  "health": 20
+}

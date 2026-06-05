@@ -2,12 +2,11 @@ function reportHotspots(hotspots, limit = 15) {
   console.log('\n  \x1b[1m\x1b[36mReporadar — Hotspot Analysis\x1b[0m\n');
   
   const top = hotspots.slice(0, limit);
-  const maxCommits = top.length > 0 ? top[0].commits : 1;
-
-  for (const stat of top) {
-    const barLength = Math.round((stat.commits / maxCommits) * 20);
+  const maxScore = top.length > 0 ? top[0].score || 1 : 1;
+  for (const h of top) {
+    const barLength = Math.round((h.score / maxScore) * 20);
     const bar = '█'.repeat(barLength) + '░'.repeat(20 - barLength);
-    console.log(`  \x1b[33m${bar}\x1b[0m ${String(stat.commits).padStart(4)} commits │ ${stat.file}`);
+    console.log(`  ${bar} \x1b[33m${h.score.toFixed(1)} score\x1b[0m (\x1b[33m${h.commits}\x1b[0m commits, \x1b[32m${h.changes}\x1b[0m lines) — \x1b[36m${h.file}\x1b[0m`);
   }
   console.log('');
 }
@@ -69,26 +68,42 @@ function reportCoupling(couplings, limit = 15) {
   console.log('');
 }
 
+function calculateHealth(risks) {
+  if (risks.length === 0) return 100;
+  const totalRisk = risks.reduce((sum, r) => sum + r.riskScore, 0);
+  const avgRisk = totalRisk / Math.max(1, risks.length);
+  return Math.max(0, 100 - Math.round(avgRisk * 1.5));
+}
+
 function reportRisk(risks, limit = 20) {
   console.log('\n  \x1b[1m\x1b[36mReporadar — Overall Risk Report\x1b[0m\n');
   
   const top = risks.slice(0, limit);
   
   for (const r of top) {
-    let color = '\x1b[32m'; // LOW
-    if (r.level === 'CRITICAL') color = '\x1b[31m\x1b[1m';
-    else if (r.level === 'HIGH') color = '\x1b[31m';
-    else if (r.level === 'MEDIUM') color = '\x1b[33m';
+    let color = '\x1b[32m'; // green
+    if (r.level === 'CRITICAL') color = '\x1b[31m'; // red
+    else if (r.level === 'HIGH') color = '\x1b[33m'; // yellow
+    else if (r.level === 'MEDIUM') color = '\x1b[36m'; // cyan
     
-    const scoreStr = String(r.riskScore).padStart(3);
-    console.log(`  ${color}[${scoreStr}] ${r.level.padEnd(8)}\x1b[0m ${r.file}`);
-    
+    console.log(`  [${String(r.riskScore).padStart(3)}] ${color}${r.level.padEnd(8)}\x1b[0m ${r.file}`);
     for (const factor of r.factors) {
       console.log(`       \x1b[2m↳ ${factor}\x1b[0m`);
     }
+    console.log('');
   }
-  
-  console.log('\n  \x1b[2mRun specific analyzers for more details: hotspots, busfactor, churn, coupling\x1b[0m\n');
+
+  const health = calculateHealth(risks);
+  let grade = 'A';
+  let color = '\x1b[32m';
+  if (health < 40) { grade = 'F'; color = '\x1b[31m'; }
+  else if (health < 60) { grade = 'D'; color = '\x1b[31m'; }
+  else if (health < 75) { grade = 'C'; color = '\x1b[33m'; }
+  else if (health < 90) { grade = 'B'; color = '\x1b[36m'; }
+
+  console.log(`  \x1b[1mRepository Health Score: ${color}${grade} (${health}/100)\x1b[0m\n`);
+
+  console.log('  \x1b[2mRun specific analyzers for more details: hotspots, busfactor, churn, coupling\x1b[0m\n');
 }
 
 function generateHtml(risks, outputPath) {
@@ -139,11 +154,75 @@ function generateHtml(risks, outputPath) {
   console.log(`\n  \x1b[32m✓ HTML Dashboard generated at: ${outputPath}\x1b[0m\n`);
 }
 
+function generateCsv(risks) {
+  const header = 'File,RiskScore,Level,Factors\n';
+  const rows = risks.map(r => {
+    const factors = r.factors.join('; ').replace(/"/g, '""');
+    return `"${r.file}",${r.riskScore},${r.level},"${factors}"`;
+  });
+  return header + rows.join('\n');
+}
+
+function generateMd(risks) {
+  let md = '# 📡 Reporadar Risk Report\n\n';
+  md += '| File | Risk Score | Level | Factors |\n';
+  md += '|---|---|---|---|\n';
+  for (const r of risks) {
+    const factors = r.factors.join('<br>↳ ');
+    let emoji = '🟢';
+    if (r.riskScore >= 75) emoji = '🔴';
+    else if (r.riskScore >= 50) emoji = '🟠';
+    else if (r.riskScore >= 25) emoji = '🟡';
+    
+    md += `| \`${r.file}\` | ${r.riskScore} | ${emoji} ${r.level} | ↳ ${factors} |\n`;
+  }
+  return md;
+}
+
+function reportOwnership(ownerships, limit = 15) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Code Ownership Analysis\x1b[0m\n');
+  
+  const top = ownerships.slice(0, limit);
+  const totalRepoChanges = ownerships.reduce((sum, o) => sum + o.totalChanges, 0);
+
+  for (const o of top) {
+    const percentage = Math.round((o.totalChanges / Math.max(1, totalRepoChanges)) * 100);
+    const barLength = Math.round((percentage / 100) * 20);
+    const bar = '█'.repeat(barLength) + '░'.repeat(20 - barLength);
+    
+    console.log(`  ${bar} \x1b[36m${o.author.padEnd(20)}\x1b[0m ${percentage}% repo impact (\x1b[33m${o.ownedFiles}\x1b[0m files owned)`);
+  }
+  console.log('');
+}
+
+function reportContributors(contributors, limit = 15) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Contributor Risk Analysis\x1b[0m\n');
+  
+  const top = contributors.slice(0, limit);
+
+  for (const c of top) {
+    let color = '\x1b[32m'; // green
+    if (c.riskScore >= 60) color = '\x1b[31m'; // red
+    else if (c.riskScore >= 40) color = '\x1b[33m'; // yellow
+    
+    const barLength = Math.round((c.riskScore / 100) * 20);
+    const bar = '█'.repeat(barLength) + '░'.repeat(20 - barLength);
+    
+    console.log(`  ${color}${bar}\x1b[0m \x1b[36m${c.author.padEnd(20)}\x1b[0m ${c.churnRatio}% churn ratio (\x1b[33m${c.commits}\x1b[0m commits)`);
+  }
+  console.log('');
+}
+
 module.exports = {
   reportHotspots,
   reportBusFactor,
   reportChurn,
   reportCoupling,
   reportRisk,
-  generateHtml
+  reportOwnership,
+  reportContributors,
+  generateHtml,
+  generateCsv,
+  generateMd,
+  calculateHealth
 };

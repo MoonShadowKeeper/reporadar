@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2026-06-05
+### Added
+- **Enterprise-Grade Architecture**: Transformed into a commercial-grade open-source analytics platform.
+- **Health Score**: A-F grading and 0-100 overall repository health score.
+- **Code Ownership Analysis**: Detailed mapping of author impact across the entire codebase.
+- **Contributor Risk Analysis**: Detects authors with high churn ratios (rewritten/deleted code).
+- **Historical Snapshots**: `--save-snapshot` to record current metrics and `--compare` to analyze trends over time.
+- **Export Formats**: `--csv` and `--md` for Jira/Wiki integration, alongside `--json` and `html`.
+- **Configuration Support**: `.reporadarrc` and `.reporadarrc.json` auto-loading.
+- **GitHub Actions Integration**: `action.yml` to run RepoRadar seamlessly in CI/CD pipelines.
+
+### Changed
+- **Hotspot Algorithm**: Now uses a logarithmic scale based on lines added/deleted combined with temporal decay (half-life of 1 year).
+- **Coupling Algorithm**: Replaced naive max changes with Jaccard similarity index for much higher accuracy.
+- **Git Buffer**: Increased execution buffer to 500MB to support massively large enterprise repositories.
+- **Test Suite**: Completely rewritten to cover the new metric outputs and CLI API.
+
 ## [1.1.1] - 2026-06-05
 ### Added
 - Comprehensive README with API docs, CI integration, and tool comparison.

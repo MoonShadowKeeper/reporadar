@@ -19,7 +19,7 @@ function getCommits(repoPath, options = {}) {
       cmd += ` -- . ${ignores}`;
     }
 
-    const output = execSync(cmd, { cwd: repoPath, encoding: 'utf8', maxBuffer: 1024 * 1024 * 50 });
+    const output = execSync(cmd, { cwd: repoPath, encoding: 'utf8', maxBuffer: 1024 * 1024 * 500 });
     
     const commits = [];
     let currentCommit = null;

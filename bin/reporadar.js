@@ -14,13 +14,41 @@ const options = {
 // Parse arguments
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
+  if (arg === '--version' || arg === '-v') {
+    console.log(require('../package.json').version);
+    process.exit(0);
+  }
+  if (arg === '--help' || arg === '-h') {
+    command = 'help';
+    break;
+  }
   if (arg === '--json') options.json = true;
+  else if (arg === '--csv') options.csv = true;
+  else if (arg === '--md') options.md = true;
+  else if (arg === '--save-snapshot') options.saveSnapshot = true;
+  else if (arg.startsWith('--compare=')) options.compare = arg.split('=')[1];
   else if (arg.startsWith('--since=')) options.since = arg.split('=')[1];
   else if (arg.startsWith('--ignore=')) options.ignore = arg.split('=')[1].split(',');
   else if (!arg.startsWith('--')) command = arg;
 }
 
 const repoPath = process.cwd();
+
+// Parse config file if exists
+const fs = require('fs');
+const configPaths = ['.reporadarrc', '.reporadarrc.json'].map(p => path.join(repoPath, p));
+for (const cp of configPaths) {
+  if (fs.existsSync(cp)) {
+    try {
+      const config = JSON.parse(fs.readFileSync(cp, 'utf8'));
+      if (config.ignore && options.ignore.length === 0) options.ignore = config.ignore;
+      if (config.since && !options.since) options.since = config.since;
+    } catch (e) {
+      console.warn(`\x1b[33mWarning: Failed to parse ${path.basename(cp)}\x1b[0m`);
+    }
+    break;
+  }
+}
 
 if (!options.json) {
   console.log(`\x1b[2mScanning repository at ${repoPath}...\x1b[0m`);
@@ -46,9 +74,33 @@ switch (command) {
     
     if (options.json) {
       console.log(JSON.stringify(risk, null, 2));
+    } else if (options.csv) {
+      console.log(reporter.generateCsv(risk));
+    } else if (options.md) {
+      console.log(reporter.generateMd(risk));
     } else {
       reporter.reportRisk(risk);
     }
+
+    if (options.saveSnapshot) {
+      const fs = require('fs');
+      fs.writeFileSync('.reporadar-snapshot.json', JSON.stringify({ date: new Date(), risk, health: reporter.calculateHealth(risk) }, null, 2));
+      console.log(`\n  \x1b[32m✓ Snapshot saved to .reporadar-snapshot.json\x1b[0m\n`);
+    }
+
+    if (options.compare) {
+      const fs = require('fs');
+      if (fs.existsSync(options.compare)) {
+        const oldSnapshot = JSON.parse(fs.readFileSync(options.compare, 'utf8'));
+        const newHealth = reporter.calculateHealth(risk);
+        const diff = newHealth - oldSnapshot.health;
+        const sign = diff > 0 ? '+' : '';
+        console.log(`\n  \x1b[1mTrend Analysis (compared to ${new Date(oldSnapshot.date).toLocaleDateString()}): Health Score changed by \x1b[33m${sign}${diff} points\x1b[0m\n`);
+      } else {
+        console.log(`\n  \x1b[31mError: Snapshot file ${options.compare} not found.\x1b[0m\n`);
+      }
+    }
+    
     break;
   }
   case 'html': {
@@ -61,6 +113,20 @@ switch (command) {
     const path = require('path');
     const outPath = path.resolve(repoPath, 'reporadar-report.html');
     reporter.generateHtml(risk, outPath);
+    break;
+  }
+  case 'ownership': {
+    const { analyzeOwnership } = require('../src');
+    const ownership = analyzeOwnership(commits);
+    if (options.json) console.log(JSON.stringify(ownership, null, 2));
+    else reporter.reportOwnership(ownership);
+    break;
+  }
+  case 'contributors': {
+    const { analyzeContributors } = require('../src');
+    const contributors = analyzeContributors(commits);
+    if (options.json) console.log(JSON.stringify(contributors, null, 2));
+    else reporter.reportContributors(contributors);
     break;
   }
   case 'hotspots': {
@@ -87,15 +153,32 @@ switch (command) {
     else reporter.reportCoupling(coupling);
     break;
   }
+  case 'help': {
+    console.log('\nUsage: reporadar [command] [options]');
+    console.log('Commands: scan | html | hotspots | busfactor | churn | coupling | ownership | contributors');
+    console.log('Options:');
+    console.log('  --json                        Output results as JSON');
+    console.log('  --csv                         Output results as CSV');
+    console.log('  --md                          Output results as Markdown');
+    console.log('  --save-snapshot               Save current risk analysis to .reporadar-snapshot.json');
+    console.log('  --compare=<file>              Compare current risk with a previous snapshot');
+    console.log('  --since=<time>                Time window (e.g. 6.months, 1.year)');
+    console.log('  --ignore=<patterns>           Comma-separated ignore patterns (e.g. package-lock.json,dist)\n');
+    process.exit(0);
+  }
   default:
     if (options.json) {
       console.log(JSON.stringify({ error: `Unknown command: ${command}` }));
     } else {
       console.log(`Unknown command: ${command}`);
       console.log('\nUsage: reporadar [command] [options]');
-      console.log('Commands: scan | html | hotspots | busfactor | churn | coupling');
+      console.log('Commands: scan | html | hotspots | busfactor | churn | coupling | ownership | contributors');
       console.log('Options:');
       console.log('  --json                        Output results as JSON');
+      console.log('  --csv                         Output results as CSV');
+      console.log('  --md                          Output results as Markdown');
+      console.log('  --save-snapshot               Save current risk analysis to .reporadar-snapshot.json');
+      console.log('  --compare=<file>              Compare current risk with a previous snapshot');
       console.log('  --since=<time>                Time window (e.g. 6.months, 1.year)');
       console.log('  --ignore=<patterns>           Comma-separated ignore patterns (e.g. package-lock.json,dist)');
     }

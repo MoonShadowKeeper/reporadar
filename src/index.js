@@ -4,6 +4,8 @@ const { analyzeBusFactor } = require('./analyzers/busfactor');
 const { analyzeChurn } = require('./analyzers/churn');
 const { analyzeCoupling } = require('./analyzers/coupling');
 const { analyzeRisk } = require('./analyzers/risk');
+const { analyzeOwnership } = require('./analyzers/ownership');
+const { analyzeContributors } = require('./analyzers/contributors');
 const reporter = require('./reporter');
 
 module.exports = {
@@ -13,5 +15,7 @@ module.exports = {
   analyzeChurn,
   analyzeCoupling,
   analyzeRisk,
+  analyzeOwnership,
+  analyzeContributors,
   reporter
 };

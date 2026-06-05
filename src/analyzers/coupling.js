@@ -38,12 +38,8 @@ function analyzeCoupling(commits) {
 
     const [fileA, fileB] = pairKey.split('::');
     
-    // Coupling strength = co-changes / total changes of the less frequently changed file
-    const maxChanges = Math.max(fileChangeCounts[fileA], fileChangeCounts[fileB]);
-    const minChanges = Math.min(fileChangeCounts[fileA], fileChangeCounts[fileB]);
-    
-    // How often do they change together relative to their individual changes?
-    const strength = coChanges / maxChanges;
+    // Jaccard similarity index for coupling
+    const strength = coChanges / (fileChangeCounts[fileA] + fileChangeCounts[fileB] - coChanges);
     
     // Only care about moderately strong coupling
     if (strength > 0.4) {
