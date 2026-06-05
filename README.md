@@ -1,6 +1,13 @@
 <div align="center">
   <h1>📡 reporadar</h1>
   <p><strong>Git repository forensic analyzer — detect code hotspots, bus factor risks, coupling, and churn</strong></p>
+
+  <p>
+    <img alt="npm version" src="https://img.shields.io/npm/v/reporadar?color=blue&style=flat-square" />
+    <img alt="license" src="https://img.shields.io/npm/l/reporadar?style=flat-square" />
+    <img alt="node" src="https://img.shields.io/node/v/reporadar?style=flat-square" />
+    <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/MoonShadowKeeper/reporadar/test.yml?style=flat-square&label=CI" />
+  </p>
 </div>
 
 ## The Problem
