@@ -1,6 +1,6 @@
 {
   "name": "reporadar",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Git repository forensic analyzer — detect code hotspots, bus factor risks, and churn patterns",
   "main": "src/index.js",
   "bin": {
