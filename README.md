@@ -40,10 +40,19 @@ Run commands inside any Git repository.
 | Command | Description |
 |---|---|
 | `reporadar scan` | **(Default)** Runs all analyzers and calculates an overall Risk Score (0-100) per file. |
+| `reporadar html` | Generates a beautiful HTML dashboard (`reporadar-report.html`) with the risk analysis. |
 | `reporadar hotspots` | Finds the most frequently modified files. |
 | `reporadar busfactor` | Identifies files heavily dependent on a single author (Bus Factor = 1). |
 | `reporadar churn` | Measures change rate relative to file age (stable vs active vs turbulent). |
 | `reporadar coupling` | Finds files that frequently co-change in the same commits (hidden dependencies). |
+
+### Global Options
+
+All commands support the following flags to customize the analysis:
+
+- `--json`: Output raw JSON instead of human-readable text. Perfect for CI/CD pipelines.
+- `--ignore="pattern"`: Comma-separated list of ignore patterns (e.g., `--ignore="package-lock.json,dist"`).
+- `--since="time"`: Time window to analyze (e.g., `--since="6.months"`, `--since="1.year"`).
 
 ### Example Output (Risk Scan)
 ```bash

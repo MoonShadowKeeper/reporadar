@@ -3,12 +3,22 @@ const { execSync } = require('child_process');
 /**
  * Gets the git commit history with file stat changes.
  * @param {string} repoPath
+ * @param {Object} options - { since: string, ignore: string[] }
  * @returns {Array} Array of parsed commits
  */
-function getCommits(repoPath) {
+function getCommits(repoPath, options = {}) {
   try {
-    // Format: hash|author|date
-    const cmd = `git log --numstat --format='COMMIT:%H|%an|%aI' --no-merges`;
+    let cmd = `git log --numstat --format='COMMIT:%H|%an|%aI' --no-merges`;
+    
+    if (options.since) {
+      cmd += ` --since="${options.since.replace(/\./g, ' ')}"`;
+    }
+
+    if (options.ignore && options.ignore.length > 0) {
+      const ignores = options.ignore.map(p => `":!${p}"`).join(' ');
+      cmd += ` -- . ${ignores}`;
+    }
+
     const output = execSync(cmd, { cwd: repoPath, encoding: 'utf8', maxBuffer: 1024 * 1024 * 50 });
     
     const commits = [];
@@ -20,9 +30,13 @@ function getCommits(repoPath) {
 
       if (line.startsWith('COMMIT:')) {
         const parts = line.substring(7).split('|');
+        // Normalize author: "John Doe " -> "john doe", also strip email if provided as name
+        let author = parts[1] ? parts[1].trim().toLowerCase() : 'unknown';
+        author = author.replace(/<.*>/, '').trim();
+
         currentCommit = {
           hash: parts[0],
-          author: parts[1],
+          author: author,
           date: parts[2],
           files: []
         };

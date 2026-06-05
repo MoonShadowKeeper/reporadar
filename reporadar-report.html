@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reporadar Risk Dashboard</title>
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 2rem; }
+    h1 { text-align: center; color: #38bdf8; }
+    .card { background: #1e293b; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; border-left: 4px solid #38bdf8; }
+    .critical { border-left-color: #ef4444; }
+    .high { border-left-color: #f97316; }
+    .medium { border-left-color: #eab308; }
+    .file { font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem; word-break: break-all; }
+    .score { font-size: 1.5rem; float: right; font-weight: 900; }
+    .reasons { color: #94a3b8; font-size: 0.9rem; }
+    .reason { margin-top: 0.3rem; }
+  </style>
+</head>
+<body>
+  <h1>📡 Reporadar Risk Dashboard</h1>
+  <div style="max-width: 900px; margin: 0 auto;">
+    <div class="card critical">
+        <span class="score">81</span>
+        <div class="file">README.md</div>
+        <div class="reasons"><div class="reason">↳ Hotspot (5 commits)</div><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (208 changes/month)</div><div class="reason">↳ Highly coupled</div></div>
+      </div><div class="card high">
+        <span class="score">65</span>
+        <div class="file">src/analyzers/risk.js</div>
+        <div class="reasons"><div class="reason">↳ Hotspot (2 commits)</div><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (565 changes/month)</div></div>
+      </div><div class="card high">
+        <span class="score">64</span>
+        <div class="file">src/reporter.js</div>
+        <div class="reasons"><div class="reason">↳ Hotspot (3 commits)</div><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (112 changes/month)</div><div class="reason">↳ Highly coupled</div></div>
+      </div><div class="card high">
+        <span class="score">62</span>
+        <div class="file">src/analyzers/churn.js</div>
+        <div class="reasons"><div class="reason">↳ Hotspot (2 commits)</div><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (429 changes/month)</div></div>
+      </div><div class="card high">
+        <span class="score">62</span>
+        <div class="file">src/analyzers/coupling.js</div>
+        <div class="reasons"><div class="reason">↳ Hotspot (2 commits)</div><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (436 changes/month)</div></div>
+      </div><div class="card high">
+        <span class="score">62</span>
+        <div class="file">test/run.js</div>
+        <div class="reasons"><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (685 changes/month)</div></div>
+      </div><div class="card high">
+        <span class="score">57</span>
+        <div class="file">package.json</div>
+        <div class="reasons"><div class="reason">↳ Hotspot (3 commits)</div><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (35 changes/month)</div></div>
+      </div><div class="card high">
+        <span class="score">51</span>
+        <div class="file">bin/reporadar.js</div>
+        <div class="reasons"><div class="reason">↳ Hotspot (2 commits)</div><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (58 changes/month)</div></div>
+      </div><div class="card high">
+        <span class="score">50</span>
+        <div class="file">.github/workflows/test.yml</div>
+        <div class="reasons"><div class="reason">↳ Hotspot (2 commits)</div><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (35 changes/month)</div></div>
+      </div><div class="card medium">
+        <span class="score">49</span>
+        <div class="file">src/index.js</div>
+        <div class="reasons"><div class="reason">↳ Hotspot (2 commits)</div><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (17 changes/month)</div></div>
+      </div><div class="card medium">
+        <span class="score">44</span>
+        <div class="file">src/analyzers/busfactor.js</div>
+        <div class="reasons"><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (53 changes/month)</div></div>
+      </div><div class="card medium">
+        <span class="score">43</span>
+        <div class="file">LICENSE</div>
+        <div class="reasons"><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (21 changes/month)</div></div>
+      </div><div class="card medium">
+        <span class="score">43</span>
+        <div class="file">src/analyzers/hotspots.js</div>
+        <div class="reasons"><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (33 changes/month)</div></div>
+      </div><div class="card medium">
+        <span class="score">43</span>
+        <div class="file">src/git.js</div>
+        <div class="reasons"><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (48 changes/month)</div></div>
+      </div><div class="card medium">
+        <span class="score">42</span>
+        <div class="file">CHANGELOG.md</div>
+        <div class="reasons"><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (17 changes/month)</div></div>
+      </div><div class="card medium">
+        <span class="score">42</span>
+        <div class="file">CONTRIBUTING.md</div>
+        <div class="reasons"><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div><div class="reason">↳ Turbulent churn (16 changes/month)</div></div>
+      </div><div class="card medium">
+        <span class="score">42</span>
+        <div class="file">.gitignore</div>
+        <div class="reasons"><div class="reason">↳ Bus factor 1 (moonshadowkeeper owns 100%)</div></div>
+      </div>
+  </div>
+</body>
+</html>

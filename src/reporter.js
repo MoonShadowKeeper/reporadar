@@ -91,10 +91,59 @@ function reportRisk(risks, limit = 20) {
   console.log('\n  \x1b[2mRun specific analyzers for more details: hotspots, busfactor, churn, coupling\x1b[0m\n');
 }
 
-module.exports = { 
-  reportHotspots, 
-  reportBusFactor, 
-  reportChurn, 
-  reportCoupling, 
-  reportRisk 
+function generateHtml(risks, outputPath) {
+  const fs = require('fs');
+  const path = require('path');
+  
+  const topRisks = risks.slice(0, 50);
+  
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reporadar Risk Dashboard</title>
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 2rem; }
+    h1 { text-align: center; color: #38bdf8; }
+    .card { background: #1e293b; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; border-left: 4px solid #38bdf8; }
+    .critical { border-left-color: #ef4444; }
+    .high { border-left-color: #f97316; }
+    .medium { border-left-color: #eab308; }
+    .file { font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem; word-break: break-all; }
+    .score { font-size: 1.5rem; float: right; font-weight: 900; }
+    .reasons { color: #94a3b8; font-size: 0.9rem; }
+    .reason { margin-top: 0.3rem; }
+  </style>
+</head>
+<body>
+  <h1>📡 Reporadar Risk Dashboard</h1>
+  <div style="max-width: 900px; margin: 0 auto;">
+    ${topRisks.map(r => {
+      let level = 'low';
+      if (r.riskScore >= 75) level = 'critical';
+      else if (r.riskScore >= 50) level = 'high';
+      else if (r.riskScore >= 25) level = 'medium';
+      
+      const reasons = r.factors.map(res => `<div class="reason">↳ ${res}</div>`).join('');
+      return `<div class="card ${level}">
+        <span class="score">${r.riskScore}</span>
+        <div class="file">${r.file}</div>
+        <div class="reasons">${reasons}</div>
+      </div>`;
+    }).join('')}
+  </div>
+</body>
+</html>`;
+
+  fs.writeFileSync(outputPath, html);
+  console.log(`\n  \x1b[32m✓ HTML Dashboard generated at: ${outputPath}\x1b[0m\n`);
+}
+
+module.exports = {
+  reportHotspots,
+  reportBusFactor,
+  reportChurn,
+  reportCoupling,
+  reportRisk,
+  generateHtml
 };
