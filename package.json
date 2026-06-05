@@ -1,0 +1,31 @@
+{
+  "name": "reporadar",
+  "version": "1.0.0",
+  "description": "Git repository forensic analyzer — detect code hotspots, bus factor risks, and churn patterns",
+  "main": "src/index.js",
+  "bin": {
+    "reporadar": "./bin/reporadar.js"
+  },
+  "keywords": [
+    "git",
+    "analytics",
+    "code-quality",
+    "bus-factor",
+    "hotspot",
+    "churn",
+    "risk",
+    "forensics",
+    "cli",
+    "devtools"
+  ],
+  "author": "MoonShadowKeeper",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md"
+  ]
+}
