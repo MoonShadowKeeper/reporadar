@@ -2,19 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.0.0] - 2026-06-05
+## [1.5.0] - 2026-06-05
 ### Added
 - **Interactive Enterprise Dashboard**: New `serve` command launches a beautiful, local web dashboard with zero dependencies.
 - **Visualizations**: Dynamic node-edge graphs (D3.js) for Temporal Coupling and interactive charts (Chart.js) for Hotspots, Languages, and Risk.
 - **Language Breakdown Analyzer**: Analyzes commit volume by programming language to identify technology drift.
 - **Issue Tracker Linkage Analyzer**: Calculates the ratio of structured development (Jira/GitHub issues) vs ad-hoc commits.
 - **Modern UI Design**: Glassmorphism aesthetics, dark mode, smooth micro-animations, and responsive layouts.
-
-### Changed
-- The `html` command now exports the interactive dashboard as a standalone, fully-offline HTML file instead of the legacy static table.
-
-## [2.0.0] - 2026-06-05
-### Added
 - **Enterprise-Grade Architecture**: Transformed into a commercial-grade open-source analytics platform.
 - **Health Score**: A-F grading and 0-100 overall repository health score.
 - **Code Ownership Analysis**: Detailed mapping of author impact across the entire codebase.
