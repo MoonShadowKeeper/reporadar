@@ -39,12 +39,17 @@ Run commands inside any Git repository.
 
 | Command | Description |
 |---|---|
-| `reporadar scan` | **(Default)** Runs all analyzers and calculates an overall Risk Score (0-100) per file. |
-| `reporadar html` | Generates a beautiful HTML dashboard (`reporadar-report.html`) with the risk analysis. |
-| `reporadar hotspots` | Finds the most frequently modified files. |
-| `reporadar busfactor` | Identifies files heavily dependent on a single author (Bus Factor = 1). |
+| `reporadar scan` | **(Default)** Runs all analyzers and calculates an overall Health Score (A-F). |
+| `reporadar serve` | Launches a local Web Dashboard with interactive D3.js and Chart.js graphs. |
+| `reporadar html` | Generates the interactive HTML dashboard to a file (`reporadar-report.html`). |
+| `reporadar hotspots` | Finds the most frequently modified files (logarithmic scale). |
+| `reporadar busfactor` | Identifies files heavily dependent on a single author. |
 | `reporadar churn` | Measures change rate relative to file age (stable vs active vs turbulent). |
 | `reporadar coupling` | Finds files that frequently co-change in the same commits (hidden dependencies). |
+| `reporadar ownership` | Analyzes which authors "own" the codebase based on impact volume. |
+| `reporadar contributors`| Identifies authors with high churn/rewrite risk ratios. |
+| `reporadar languages` | Analyzes commit volume distributed by programming language. |
+| `reporadar tickets`   | Measures the ratio of commits linked to issue trackers (Jira/GitHub). |
 
 ### Global Options
 
