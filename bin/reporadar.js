@@ -103,16 +103,43 @@ switch (command) {
     
     break;
   }
-  case 'html': {
+  case 'serve': {
+    const { server, analyzeOwnership, analyzeContributors, analyzeLanguages, analyzeTickets } = require('../src');
     const hotspots = analyzeHotspots(commits);
     const busfactor = analyzeBusFactor(commits);
     const churn = analyzeChurn(commits);
     const coupling = analyzeCoupling(commits);
+    const ownership = analyzeOwnership(commits);
+    const contributors = analyzeContributors(commits);
+    const languages = analyzeLanguages(commits);
+    const tickets = analyzeTickets(commits);
     const risk = analyzeRisk(hotspots, busfactor, churn, coupling);
+    const health = reporter.calculateHealth(risk);
+
+    const fullData = { hotspots, busfactor, churn, coupling, ownership, contributors, languages, tickets, risk, health };
     
-    const path = require('path');
-    const outPath = path.resolve(repoPath, 'reporadar-report.html');
-    reporter.generateHtml(risk, outPath);
+    server.startServer(fullData, options.port || 3000);
+    break;
+  }
+  case 'html': {
+    const { server, analyzeOwnership, analyzeContributors, analyzeLanguages, analyzeTickets } = require('../src');
+    const hotspots = analyzeHotspots(commits);
+    const busfactor = analyzeBusFactor(commits);
+    const churn = analyzeChurn(commits);
+    const coupling = analyzeCoupling(commits);
+    const ownership = analyzeOwnership(commits);
+    const contributors = analyzeContributors(commits);
+    const languages = analyzeLanguages(commits);
+    const tickets = analyzeTickets(commits);
+    const risk = analyzeRisk(hotspots, busfactor, churn, coupling);
+    const health = reporter.calculateHealth(risk);
+
+    const fullData = { hotspots, busfactor, churn, coupling, ownership, contributors, languages, tickets, risk, health };
+    
+    const html = server.getHtmlTemplate(fullData);
+    const fs = require('fs');
+    fs.writeFileSync('reporadar-report.html', html);
+    console.log('✓ HTML dashboard generated: reporadar-report.html');
     break;
   }
   case 'ownership': {
@@ -169,7 +196,7 @@ switch (command) {
   }
   case 'help': {
     console.log('\nUsage: reporadar [command] [options]');
-    console.log('Commands: scan | html | hotspots | busfactor | churn | coupling | ownership | contributors | languages | tickets');
+    console.log('Commands: scan | serve | html | hotspots | busfactor | churn | coupling | ownership | contributors | languages | tickets');
     console.log('Options:');
     console.log('  --json                        Output results as JSON');
     console.log('  --csv                         Output results as CSV');

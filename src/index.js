@@ -9,6 +9,7 @@ const { analyzeContributors } = require('./analyzers/contributors');
 const { analyzeLanguages } = require('./analyzers/languages');
 const { analyzeTickets } = require('./analyzers/tickets');
 const reporter = require('./reporter');
+const server = require('./server');
 
 module.exports = {
   getCommits,
@@ -21,5 +22,6 @@ module.exports = {
   analyzeContributors,
   analyzeLanguages,
   analyzeTickets,
-  reporter
+  reporter,
+  server
 };
