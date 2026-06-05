@@ -1,5 +1,5 @@
 function reportHotspots(hotspots, limit = 15) {
-  console.log('\n  \x1b[1m\x1b[36m📡 Reporadar — Hotspot Analysis\x1b[0m\n');
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Hotspot Analysis\x1b[0m\n');
   
   const top = hotspots.slice(0, limit);
   const maxCommits = top.length > 0 ? top[0].commits : 1;
@@ -13,7 +13,7 @@ function reportHotspots(hotspots, limit = 15) {
 }
 
 function reportBusFactor(busFactors, limit = 15) {
-  console.log('\n  \x1b[1m\x1b[36m📡 Reporadar — Bus Factor Analysis\x1b[0m\n');
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Bus Factor Analysis\x1b[0m\n');
   
   const critical = busFactors.filter(f => f.busFactor === 1).slice(0, limit);
   const healthy = busFactors.filter(f => f.busFactor > 1).slice(0, 5);
@@ -38,7 +38,7 @@ function reportBusFactor(busFactors, limit = 15) {
 }
 
 function reportChurn(churns, limit = 15) {
-  console.log('\n  \x1b[1m\x1b[36m📡 Reporadar — Code Churn Analysis\x1b[0m\n');
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Code Churn Analysis\x1b[0m\n');
   
   const top = churns.slice(0, limit);
   for (const c of top) {
@@ -53,7 +53,7 @@ function reportChurn(churns, limit = 15) {
 }
 
 function reportCoupling(couplings, limit = 15) {
-  console.log('\n  \x1b[1m\x1b[36m📡 Reporadar — Hidden Coupling (Co-changing files)\x1b[0m\n');
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Hidden Coupling (Co-changing files)\x1b[0m\n');
   
   if (couplings.length === 0) {
     console.log('  \x1b[32m✓ No strong coupling detected.\x1b[0m\n');
@@ -70,7 +70,7 @@ function reportCoupling(couplings, limit = 15) {
 }
 
 function reportRisk(risks, limit = 20) {
-  console.log('\n  \x1b[1m\x1b[36m📡 Reporadar — Overall Risk Report\x1b[0m\n');
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Overall Risk Report\x1b[0m\n');
   
   const top = risks.slice(0, limit);
   

@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: 🧪 Run analysis
+    name: Run analysis
     runs-on: ubuntu-latest
     
     strategy:

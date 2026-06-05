@@ -12,16 +12,16 @@
 
 ---
 
-## 🧐 The Problem
+## The Problem
 Codebases accumulate hidden risks over time that aren't caught by linters or tests. The most dangerous are:
-1. **🔥 Hotspots**: Files that change constantly, indicating design flaws, missing abstractions, or tech debt.
-2. **🚌 Bus Factor**: Critical files that only one developer understands. If they leave, the knowledge is lost.
-3. **🌪️ High Churn**: Old, stable files that suddenly start changing rapidly (a sign of architectural decay).
-4. **🔗 Hidden Coupling**: Files that always change together in the same commits, but have no explicit dependency in the code.
+1. **Hotspots**: Files that change constantly, indicating design flaws, missing abstractions, or tech debt.
+2. **Bus Factor**: Critical files that only one developer understands. If they leave, the knowledge is lost.
+3. **High Churn**: Old, stable files that suddenly start changing rapidly (a sign of architectural decay).
+4. **Hidden Coupling**: Files that always change together in the same commits, but have no explicit dependency in the code.
 
 **reporadar** analyzes your git history locally to uncover these risks before they become incidents. Zero external dependencies, instant results.
 
-## 🚀 Installation
+## Installation
 
 ### Global Install
 ```bash
@@ -33,7 +33,7 @@ npm install -g reporadar
 npx reporadar scan
 ```
 
-## 🛠️ Commands & Usage
+## Commands & Usage
 
 Run commands inside any Git repository.
 
@@ -49,7 +49,7 @@ Run commands inside any Git repository.
 ```bash
 $ reporadar scan
 
-  📡 Reporadar — Overall Risk Report
+  Reporadar — Overall Risk Report
 
   [100] CRITICAL src/core/engine.js
        ↳ Hotspot (142 commits)
@@ -64,7 +64,7 @@ $ reporadar scan
        ↳ Hotspot (45 commits)
 ```
 
-## 🤖 CI Integration (GitHub Actions)
+## CI Integration (GitHub Actions)
 
 You can easily integrate `reporadar` into your CI/CD pipeline to monitor repository health on every push. Since it requires no dependencies, it runs in seconds.
 
@@ -84,7 +84,7 @@ jobs:
         run: npx reporadar scan
 ```
 
-## 💻 Programmatic API
+## Programmatic API
 
 You can use `reporadar` directly in your Node.js scripts to build custom dashboards or CI blockers:
 
@@ -102,7 +102,7 @@ console.log(hotspots[0]);
 // { file: 'src/main.js', commits: 150, changes: 4500, authors: 4 }
 ```
 
-## 🥊 Comparison
+## Comparison
 
 How does `reporadar` compare to other tools in the ecosystem?
 
@@ -115,6 +115,6 @@ How does `reporadar` compare to other tools in the ecosystem?
 | **Hidden Coupling** | ✅ Yes | ✅ Yes | ❌ No |
 | **CI Friendly** | ✅ Yes (npx runs instantly) | ⚠️ Complex | ⚠️ Slow for CI |
 
-## 📄 License
+## License
 
 Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more information.
