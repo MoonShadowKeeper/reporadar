@@ -115,14 +115,19 @@ console.log(hotspots[0]);
 
 How does `reporadar` compare to other tools in the ecosystem?
 
-| Feature | `reporadar` | CodeScene | git-of-theseus |
+| Feature | RepoRadar | CodeScene | git-of-theseus |
 |---|---|---|---|
-| **Price** | Free (Open Source) | Paid (Enterprise) | Free |
-| **Language** | Node.js (Zero deps) | Java / Clojure | Python |
-| **Setup Time** | < 5 seconds | Minutes / SaaS setup | Requires Python env |
-| **Bus Factor Analysis**| ✅ Yes | ✅ Yes | ❌ No |
-| **Hidden Coupling** | ✅ Yes | ✅ Yes | ❌ No |
-| **CI Friendly** | ✅ Yes (npx runs instantly) | ⚠️ Complex | ⚠️ Slow for CI |
+| **Price** | Free & Open Source | Paid | Free & Open Source |
+| **Installation** | `npx reporadar` | SaaS / Server | Python Setup |
+| **Language** | Node.js | Java / Clojure | Python |
+| **Hotspot Analysis** | ✅ | ✅ | ⚠️ Partial |
+| **Bus Factor Analysis** | ✅ | ✅ | ❌ |
+| **Hidden Coupling** | ✅ | ✅ | ❌ |
+| **Ownership Analysis** | ✅ | ✅ | ⚠️ Limited |
+| **Churn Analysis** | ✅ | ✅ | ✅ |
+| **CI/CD Friendly** | ✅ Excellent | ✅ | ⚠️ Limited |
+| **Local Execution** | ✅ | ⚠️ Self-hosted only | ✅ |
+| **Open Source** | ✅ | ❌ | ✅ |
 
 ## License
 
