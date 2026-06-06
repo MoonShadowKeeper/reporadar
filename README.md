@@ -4,8 +4,8 @@
 
   <p>
     <a href="https://www.npmjs.com/package/reporadar"><img alt="npm version" src="https://img.shields.io/npm/v/reporadar?color=blue&style=flat-square" /></a>
-    <img alt="node" src="https://img.shields.io/node/v/reporadar?style=flat-square" />
-    <img alt="license" src="https://img.shields.io/npm/l/reporadar?style=flat-square" />
+    <a href="https://nodejs.org"><img alt="node" src="https://img.shields.io/node/v/reporadar?style=flat-square" /></a>
+    <a href="https://github.com/MoonShadowKeeper/reporadar/blob/master/LICENSE"><img alt="license" src="https://img.shields.io/npm/l/reporadar?style=flat-square" /></a>
     <a href="https://github.com/MoonShadowKeeper/reporadar/actions"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/MoonShadowKeeper/reporadar/test.yml?style=flat-square&label=CI" /></a>
   </p>
 </div>
@@ -50,6 +50,12 @@ Run commands inside any Git repository.
 | `reporadar contributors`| Identifies authors with high churn/rewrite risk ratios. |
 | `reporadar languages` | Analyzes commit volume distributed by programming language. |
 | `reporadar tickets`   | Measures the ratio of commits linked to issue trackers (Jira/GitHub). |
+| `reporadar prs`       | Analyzes pull requests, merge commits, and CI/CD patterns vs solo coding. |
+| `reporadar legacy`    | Detects "dusty" legacy code that hasn't been touched in over a year. |
+| `reporadar attrition` | Identifies orphaned files whose primary authors are completely inactive (left the team). |
+| `reporadar messages`  | Grades commit message quality (length, conventions, ticket refs). |
+| `reporadar multi`     | Analyzes multiple repositories simultaneously to output a unified team health table. |
+| `reporadar bot`       | Generates a Markdown summary tailored for CI/CD PR comments (GitHub Actions / GitLab). |
 
 ### Global Options
 
@@ -58,24 +64,26 @@ All commands support the following flags to customize the analysis:
 - `--json`: Output raw JSON instead of human-readable text. Perfect for CI/CD pipelines.
 - `--ignore="pattern"`: Comma-separated list of ignore patterns (e.g., `--ignore="package-lock.json,dist"`).
 - `--since="time"`: Time window to analyze (e.g., `--since="6.months"`, `--since="1.year"`).
+- `--cache`: Caches the parsed git history for instant re-runs on large codebases.
+- `--watch`: Keeps the process alive and automatically re-runs analysis on new commits.
+- `--repos="paths"`: Comma-separated paths for the `multi` command.
 
-### Example Output (Risk Scan)
-```bash
-$ reporadar scan
+## Configuration & Aliases
 
-  Reporadar — Overall Risk Report
+You can customize thresholds and merge multiple author emails into a single user by creating a `reporadar.config.json` file in the root of your project:
 
-  [100] CRITICAL src/core/engine.js
-       ↳ Hotspot (142 commits)
-       ↳ Bus factor 1 (John Doe owns 95%)
-       ↳ Turbulent churn (8.5 changes/month)
-
-  [ 65] HIGH     src/api/routes.js
-       ↳ Highly coupled
-       ↳ Bus factor 2
-
-  [ 30] MEDIUM   src/utils/helpers.js
-       ↳ Hotspot (45 commits)
+```json
+{
+  "aliases": {
+    "John Doe": ["john.doe@gmail.com", "johnd"],
+    "Jane Smith": ["jane@company.com", "jane-smith"]
+  },
+  "thresholds": {
+    "burnoutWeekendPercent": 20,
+    "ttmSlowDays": 7,
+    "busFactorCritical": 1
+  }
+}
 ```
 
 ## CI Integration (GitHub Actions)
@@ -94,8 +102,8 @@ jobs:
         with:
           fetch-depth: 0 # Required! reporadar needs git history
           
-      - name: Run Reporadar
-        run: npx reporadar scan
+      - name: Run Reporadar Health Check
+        run: npx reporadar bot
 ```
 
 ## Programmatic API

@@ -14,6 +14,14 @@ const reporter = require('./reporter');
 const server = require('./server');
 
 const { analyzePrs } = require('./analyzers/prs');
+const { analyzeAge } = require('./analyzers/age');
+const { analyzeAttrition } = require('./analyzers/attrition');
+const { analyzeMessages } = require('./analyzers/messages');
+const { analyzeBurnout } = require('./analyzers/burnout');
+const { analyzeTtm } = require('./analyzers/ttm');
+const { analyzeZombies } = require('./analyzers/zombies');
+const { analyzeMap } = require('./analyzers/map');
+const { loadConfig, applyAliases } = require('./config');
 
 module.exports = {
   getCommits,
@@ -29,6 +37,15 @@ module.exports = {
   analyzeTimeline,
   analyzeComplexity,
   analyzePrs,
+  analyzeAge,
+  analyzeAttrition,
+  analyzeMessages,
+  analyzeBurnout,
+  analyzeTtm,
+  analyzeZombies,
+  analyzeMap,
   reporter,
-  server
+  server,
+  loadConfig,
+  applyAliases
 };

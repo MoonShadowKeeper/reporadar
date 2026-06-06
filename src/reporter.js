@@ -69,10 +69,20 @@ function reportCoupling(couplings, limit = 15) {
 }
 
 function calculateHealth(risks) {
-  if (risks.length === 0) return 100;
-  const totalRisk = risks.reduce((sum, r) => sum + r.riskScore, 0);
-  const avgRisk = totalRisk / Math.max(1, risks.length);
-  return Math.max(0, 100 - Math.round(avgRisk * 1.5));
+  let score = 100;
+  if (risks.length > 0) {
+    const totalRisk = risks.reduce((sum, r) => sum + r.riskScore, 0);
+    const avgRisk = totalRisk / Math.max(1, risks.length);
+    score = Math.max(0, 100 - Math.round(avgRisk * 1.5));
+  }
+  
+  let grade = 'A';
+  if (score < 40) grade = 'F';
+  else if (score < 60) grade = 'D';
+  else if (score < 75) grade = 'C';
+  else if (score < 90) grade = 'B';
+  
+  return { score, grade };
 }
 
 function reportRisk(risks, limit = 20) {
@@ -94,14 +104,13 @@ function reportRisk(risks, limit = 20) {
   }
 
   const health = calculateHealth(risks);
-  let grade = 'A';
   let color = '\x1b[32m';
-  if (health < 40) { grade = 'F'; color = '\x1b[31m'; }
-  else if (health < 60) { grade = 'D'; color = '\x1b[31m'; }
-  else if (health < 75) { grade = 'C'; color = '\x1b[33m'; }
-  else if (health < 90) { grade = 'B'; color = '\x1b[36m'; }
+  if (health.score < 40) color = '\x1b[31m';
+  else if (health.score < 60) color = '\x1b[31m';
+  else if (health.score < 75) color = '\x1b[33m';
+  else if (health.score < 90) color = '\x1b[36m';
 
-  console.log(`  \x1b[1mRepository Health Score: ${color}${grade} (${health}/100)\x1b[0m\n`);
+  console.log(`  \x1b[1mRepository Health Score: ${color}${health.grade} (${health.score}/100)\x1b[0m\n`);
 
   console.log('  \x1b[2mRun specific analyzers for more details: hotspots, busfactor, churn, coupling\x1b[0m\n');
 }
@@ -315,6 +324,140 @@ function reportPrs(prs) {
   console.log('');
 }
 
+function reportAge(ageData, limit = 15) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Legacy Code Detection (Code Age)\x1b[0m\n');
+  
+  const legacy = ageData.filter(a => a.status === 'legacy' || a.status === 'dormant');
+  if (legacy.length === 0) {
+    console.log('  \x1b[32m✓ No legacy code detected. The codebase is actively maintained.\x1b[0m\n');
+    return;
+  }
+
+  console.log(`  Found \x1b[33m${legacy.length}\x1b[0m files that haven't been touched in over a year.\n`);
+  
+  for (const f of legacy.slice(0, limit)) {
+    const color = f.status === 'legacy' ? '\x1b[31m' : '\x1b[33m';
+    console.log(`  ${color}●\x1b[0m \x1b[1m${f.ageMonths} months ago\x1b[0m (${f.lastModified}) — ${f.file}`);
+  }
+  console.log('');
+}
+
+function reportAttrition(orphanedFiles, limit = 15) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Team Attrition Risk (Orphaned Code)\x1b[0m\n');
+  
+  if (orphanedFiles.length === 0) {
+    console.log('  \x1b[32m✓ No orphaned code detected. Codebase knowledge is well distributed.\x1b[0m\n');
+    return;
+  }
+
+  console.log(`  \x1b[31m⚠️  WARNING: Found ${orphanedFiles.length} files highly dependent on inactive authors.\x1b[0m\n`);
+  
+  for (const f of orphanedFiles.slice(0, limit)) {
+    console.log(`  \x1b[31m●\x1b[0m \x1b[1m${f.file}\x1b[0m`);
+    console.log(`       \x1b[2mPrimary author: \x1b[33m${f.primaryAuthor}\x1b[2m (${f.ownershipRatio}% ownership) — inactive for ${f.inactiveMonths} months\x1b[0m`);
+  }
+  console.log('');
+}
+
+function reportMessages(msgData) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Commit Message Quality\x1b[0m\n');
+  
+  if (!msgData) return;
+
+  const scoreColor = msgData.score >= 80 ? '\x1b[32m' : (msgData.score >= 50 ? '\x1b[33m' : '\x1b[31m');
+  console.log(`  Quality Score: ${scoreColor}\x1b[1m${msgData.score}/100\x1b[0m\n`);
+  
+  console.log(`  Conventional Commits: \x1b[1m${msgData.conventionalPercentage}%\x1b[0m (feat:, fix:, etc.)`);
+  console.log(`  Short/Vague Messages: \x1b[1m${msgData.shortPercentage}%\x1b[0m (< 15 chars)`);
+  console.log(`  Linked to Tickets:    \x1b[1m${msgData.ticketPercentage}%\x1b[0m (e.g. #123, PROJ-456)\n`);
+  
+  if (msgData.topOffenders.length > 0) {
+    console.log('  \x1b[36mTop offenders (vague commits):\x1b[0m');
+    for (const offender of msgData.topOffenders) {
+      console.log(`    \x1b[31m✘\x1b[0m ${offender.author.padEnd(20)} ${offender.count} vague commits`);
+    }
+  }
+  console.log('');
+}
+
+function reportBurnout(burnoutData) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Team Burnout Risk\x1b[0m\n');
+  
+  if (burnoutData.length === 0) {
+    console.log('  \x1b[32m✓ No developers analyzed or not enough data.\x1b[0m\n');
+    return;
+  }
+
+  console.log('  \x1b[2mAnalyzing weekend and late-night (22:00-06:00) commit patterns...\x1b[0m\n');
+
+  for (const author of burnoutData) {
+    let color = author.riskLevel === 'High' ? '\x1b[31m' : (author.riskLevel === 'Medium' ? '\x1b[33m' : '\x1b[32m');
+    let icon = author.riskLevel === 'High' ? '🔥' : (author.riskLevel === 'Medium' ? '⚠️ ' : '✅');
+    
+    console.log(`  ${icon} ${color}\x1b[1m${author.author.padEnd(20)}\x1b[0m Risk: ${color}${author.riskLevel}\x1b[0m`);
+    console.log(`      \x1b[2mWeekend: \x1b[0m${author.weekendPercent}% \x1b[2mLate Night: \x1b[0m${author.lateNightPercent}% \x1b[2m(Total commits: ${author.totalCommits})\x1b[0m`);
+  }
+  console.log('');
+}
+
+function reportTtm(ttmData) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Time-To-Merge (Review Bottlenecks)\x1b[0m\n');
+  
+  if (ttmData.totalAnalyzed === 0) {
+    console.log('  \x1b[33mNot enough merge commits to analyze TTM.\x1b[0m\n');
+    return;
+  }
+
+  const avgColor = ttmData.averageDays > 3 ? '\x1b[31m' : (ttmData.averageDays > 1 ? '\x1b[33m' : '\x1b[32m');
+  
+  console.log(`  Average Time-To-Merge: ${avgColor}\x1b[1m${ttmData.averageDays} days\x1b[0m (${ttmData.averageHours} hours)`);
+  console.log(`  Fast Merges (< 24h):   \x1b[32m${ttmData.fastMerges}\x1b[0m`);
+  console.log(`  Slow Merges (> 7d):    \x1b[31m${ttmData.slowMerges}\x1b[0m\n`);
+  
+  if (ttmData.slowMerges > 0) {
+    console.log('  \x1b[36mSlowest PRs/Merges:\x1b[0m');
+    for (const detail of ttmData.details.slice(0, 5)) {
+      if (detail.hours > 24 * 7) {
+        const days = Math.round(detail.hours / 24);
+        console.log(`    \x1b[31m●\x1b[0m ${detail.hash.substring(0, 7)} took \x1b[1m${days} days\x1b[0m (Merged: ${detail.mergeDate})`);
+      }
+    }
+  }
+  console.log('');
+}
+
+function reportZombies(zombies) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Zombie Branches\x1b[0m\n');
+  
+  if (zombies.length === 0) {
+    console.log('  \x1b[32m✓ No zombie branches found. Repository is clean.\x1b[0m\n');
+    return;
+  }
+
+  console.log(`  \x1b[33mFound ${zombies.length} stale branches (no activity for > 2 months).\x1b[0m\n`);
+  
+  for (const z of zombies.slice(0, 15)) {
+    console.log(`  \x1b[31m🧟\x1b[0m \x1b[1m${z.branch.padEnd(30)}\x1b[0m \x1b[2m(Inactive for ${z.ageMonths} months, author: ${z.author})\x1b[0m`);
+  }
+  console.log('');
+}
+
+function reportMap(mapData) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Module Ownership Map\x1b[0m\n');
+  
+  if (mapData.length === 0) {
+    console.log('  \x1b[33mNot enough data to map modules.\x1b[0m\n');
+    return;
+  }
+
+  for (const mod of mapData.slice(0, 10)) {
+    console.log(`  📁 \x1b[1m\x1b[34m${mod.module.padEnd(25)}\x1b[0m \x1b[2m(${mod.totalChanges} changes)\x1b[0m`);
+    let ownersStr = mod.owners.map(o => `\x1b[32m${o.author}\x1b[0m (${o.percentage}%)`).join(', ');
+    console.log(`       Owners: ${ownersStr}`);
+  }
+  console.log('');
+}
+
 module.exports = {
   reportHotspots,
   reportBusFactor,
@@ -328,6 +471,13 @@ module.exports = {
   reportTimeline,
   reportComplexity,
   reportPrs,
+  reportAge,
+  reportAttrition,
+  reportMessages,
+  reportBurnout,
+  reportTtm,
+  reportZombies,
+  reportMap,
   generateHtml,
   generateCsv,
   generateMd,

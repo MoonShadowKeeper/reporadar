@@ -392,6 +392,47 @@ function getHtmlTemplate(data) {
                 <canvas id="timelineChart"></canvas>
             </div>
         </div>
+
+        <!-- 9. Message Quality -->
+        <div class="card glass animate-in" style="animation-delay: 0.9s;">
+            <div class="card-header">
+                <h2>📝 Commit Messages</h2>
+                <p class="subtitle">Quality score and conventional commits ratio</p>
+            </div>
+            <div class="chart-container" style="display: flex; justify-content: center; align-items: center;">
+                <div style="width: 250px; height: 250px;">
+                    <canvas id="messagesChart"></canvas>
+                </div>
+            </div>
+            <div id="messageScore" style="text-align: center; margin-top: 15px; font-weight: bold; font-size: 18px;"></div>
+        </div>
+
+        <!-- 10. Burnout Risk -->
+        <div class="card glass animate-in" style="animation-delay: 1.0s;">
+            <div class="card-header">
+                <h2>🔥 Burnout Risk</h2>
+                <p class="subtitle">Developers overworking on weekends/nights</p>
+            </div>
+            <ul class="risk-list" id="burnoutList"></ul>
+        </div>
+
+        <!-- 11. Module Ownership -->
+        <div class="card glass animate-in" style="animation-delay: 1.1s;">
+            <div class="card-header">
+                <h2>📁 Module Map</h2>
+                <p class="subtitle">Codebase ownership by directory</p>
+            </div>
+            <ul class="risk-list" id="mapList"></ul>
+        </div>
+
+        <!-- 12. Legacy & Attrition -->
+        <div class="card glass animate-in" style="animation-delay: 1.2s;">
+            <div class="card-header">
+                <h2>🏺 Legacy & Orphans</h2>
+                <p class="subtitle">Dusty code & inactive primary authors</p>
+            </div>
+            <ul class="risk-list" id="legacyList"></ul>
+        </div>
     </div>
 
     <script>
@@ -565,35 +606,133 @@ function getHtmlTemplate(data) {
         }
 
         // 8. Timeline Chart (Line Chart)
-        if (data.timeline) {
+        if (data.timeline && Object.keys(data.timeline).length > 0) {
             const timeCtx = document.getElementById('timelineChart').getContext('2d');
+            const labels = Object.keys(data.timeline).sort();
+            const values = labels.map(l => data.timeline[l]);
+            
             new Chart(timeCtx, {
                 type: 'line',
                 data: {
-                    labels: data.timeline.months.map(m => m.month),
+                    labels: labels,
                     datasets: [{
-                        label: 'Commits',
-                        data: data.timeline.months.map(m => m.commits),
+                        label: 'Commits per Month',
+                        data: values,
                         borderColor: '#3b82f6',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         borderWidth: 2,
+                        tension: 0.3,
                         fill: true,
-                        tension: 0.4
+                        pointBackgroundColor: '#3b82f6',
+                        pointRadius: 3
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
                     scales: {
-                        x: { grid: { display: false } },
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }
-                    }
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8', maxTicksLimit: 12 } }
+                    },
+                    plugins: { legend: { display: false } }
                 }
             });
         }
 
-        // 9. Coupling Graph (D3 Force Directed)
+        // 9. Messages Chart (Doughnut)
+        if (data.messages) {
+            document.getElementById('messageScore').innerHTML = 'Quality Score: <span style="color: ' + (data.messages.score > 75 ? '#10b981' : '#f59e0b') + ';">' + data.messages.score + '/100</span>';
+            const msgCtx = document.getElementById('messagesChart').getContext('2d');
+            new Chart(msgCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Conventional', 'Short/Vague', 'Other'],
+                    datasets: [{
+                        data: [
+                            data.messages.conventionalPercentage,
+                            data.messages.shortPercentage,
+                            100 - data.messages.conventionalPercentage - data.messages.shortPercentage
+                        ],
+                        backgroundColor: ['#10b981', '#ef4444', '#3b82f6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } }
+                }
+            });
+        }
+
+        // 10. Burnout List
+        if (data.burnout) {
+            const burnoutList = document.getElementById('burnoutList');
+            if (data.burnout.length === 0) {
+                burnoutList.innerHTML = '<li class="risk-item" style="color: #10b981;">No burnout risks detected!</li>';
+            } else {
+                data.burnout.slice(0, 10).forEach(b => {
+                    const li = document.createElement('li');
+                    li.className = 'risk-item';
+                    const icon = b.riskLevel === 'High' ? '🔥' : (b.riskLevel === 'Medium' ? '⚠️' : '✅');
+                    const color = b.riskLevel === 'High' ? '#ef4444' : (b.riskLevel === 'Medium' ? '#f59e0b' : '#10b981');
+                    li.innerHTML = \`
+                        <div class="risk-file">\${icon} <span style="color: \${color}">\${b.author}</span></div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Wknd: \${b.weekendPercent}% | Ngt: \${b.lateNightPercent}%</div>
+                    \`;
+                    burnoutList.appendChild(li);
+                });
+            }
+        }
+
+        // 11. Map List
+        if (data.map) {
+            const mapList = document.getElementById('mapList');
+            data.map.slice(0, 10).forEach(m => {
+                const li = document.createElement('li');
+                li.className = 'risk-item';
+                const primary = m.owners.length > 0 ? m.owners[0].author : 'Unknown';
+                li.innerHTML = \`
+                    <div class="risk-file">📁 \${m.module}</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">Owner: \${primary}</div>
+                \`;
+                mapList.appendChild(li);
+            });
+        }
+
+        // 12. Legacy & Attrition List
+        if (data.age && data.attrition) {
+            const legacyList = document.getElementById('legacyList');
+            let items = 0;
+            
+            data.attrition.slice(0, 5).forEach(a => {
+                items++;
+                const li = document.createElement('li');
+                li.className = 'risk-item';
+                li.innerHTML = \`
+                    <div class="risk-file">👻 \${a.file}</div>
+                    <div style="font-size: 12px; color: #ef4444;">Orphaned (\${a.inactiveMonths}mo)</div>
+                \`;
+                legacyList.appendChild(li);
+            });
+
+            data.age.filter(a => a.status === 'legacy').slice(0, 10 - items).forEach(a => {
+                const li = document.createElement('li');
+                li.className = 'risk-item';
+                li.innerHTML = \`
+                    <div class="risk-file">🏺 \${a.file}</div>
+                    <div style="font-size: 12px; color: #f59e0b;">Legacy (\${a.ageMonths}mo)</div>
+                \`;
+                legacyList.appendChild(li);
+            });
+
+            if (legacyList.children.length === 0) {
+                legacyList.innerHTML = '<li class="risk-item" style="color: #10b981;">Codebase is fresh and well maintained!</li>';
+            }
+        }
+
+        // 13. Coupling Graph (D3 Force Directed)
         function drawCouplingGraph() {
             if(!data.coupling || data.coupling.length === 0) {
                 document.getElementById('couplingGraph').innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;">No strong coupling detected in the history.</div>';

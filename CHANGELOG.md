@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.2] - 2026-06-06
+### Added
+- **Team Burnout Risk**: New command `reporadar burnout` to detect developers consistently working on weekends or late at night.
+- **Time-To-Merge**: New command `reporadar ttm` to find CI/CD review bottlenecks and average merge times.
+- **Zombie Branches**: New command `reporadar zombies` to detect stale branches without activity for >2 months.
+- **Module Ownership Map**: New command `reporadar map` to visualize ownership distribution at the directory/module level.
+- **Commit Message Quality**: New command `reporadar messages` to grade commit descriptions, detecting vague messages and conventional commit usage.
+- **Team Attrition Risk**: New command `reporadar attrition` (or `orphans`) to find "orphaned code" — files highly dependent on inactive authors.
+- **Legacy Code Detection**: New command `reporadar legacy` (or `age`) to find "dusty" files untouched in over a year.
+- **Web Dashboard Integration**: Upgraded `reporadar serve` and `reporadar html` with 4 new visual cards for the metrics above.
+
 ## [1.7.1] - 2026-06-06
 ### Added
 - **Multi-Repository Support**: New command `reporadar multi --repos=./repo1,./repo2` to generate a summary table across multiple microservices.

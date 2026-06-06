@@ -593,8 +593,8 @@ async function main() {
         cwd: projectRoot,
       });
       assert.ok(
-        output.includes('1.7.1'),
-        `--version should output 1.7.1, got: ${output.trim()}`
+        output.includes('1.7.2'),
+        `--version should output 1.7.2, got: ${output.trim()}`
       );
     });
 

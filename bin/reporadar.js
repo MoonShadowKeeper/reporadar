@@ -113,7 +113,12 @@ function runAnalysis() {
     }, 80);
   }
 
-  const commits = getCommits(repoPath, options);
+  const { getCommits, loadConfig, applyAliases } = require('../src');
+
+  let config = loadConfig(repoPath);
+
+  let commits = getCommits(repoPath, options);
+  commits = applyAliases(commits, config.aliases);
 
   if (spinnerTimer) {
     clearInterval(spinnerTimer);
@@ -167,7 +172,7 @@ switch (command) {
     break;
   }
   case 'serve': {
-    const { server, analyzeOwnership, analyzeContributors, analyzeLanguages, analyzeTickets, analyzeTimeline, analyzeComplexity } = require('../src');
+    const { server, analyzeOwnership, analyzeContributors, analyzeLanguages, analyzeTickets, analyzeTimeline, analyzeComplexity, analyzeAge, analyzeAttrition, analyzeMessages, analyzeBurnout, analyzeTtm, analyzeZombies, analyzeMap } = require('../src');
     const hotspots = analyzeHotspots(commits);
     const busfactor = analyzeBusFactor(commits);
     const churn = analyzeChurn(commits);
@@ -180,14 +185,22 @@ switch (command) {
     const complexity = analyzeComplexity(commits);
     const risk = analyzeRisk(hotspots, busfactor, churn, coupling);
     const health = reporter.calculateHealth(risk);
+    
+    const age = analyzeAge(commits);
+    const attrition = analyzeAttrition(commits);
+    const messages = analyzeMessages(commits);
+    const burnout = analyzeBurnout(commits);
+    const ttm = analyzeTtm(repoPath, options);
+    const zombies = analyzeZombies(repoPath);
+    const map = analyzeMap(commits);
 
-    const fullData = { hotspots, busfactor, churn, coupling, ownership, contributors, languages, tickets, timeline, complexity, risk, health };
+    const fullData = { hotspots, busfactor, churn, coupling, ownership, contributors, languages, tickets, timeline, complexity, risk, health, age, attrition, messages, burnout, ttm, zombies, map };
     
     server.startServer(fullData, options.port || 3000);
     break;
   }
   case 'html': {
-    const { server, analyzeOwnership, analyzeContributors, analyzeLanguages, analyzeTickets, analyzeTimeline, analyzeComplexity } = require('../src');
+    const { server, analyzeOwnership, analyzeContributors, analyzeLanguages, analyzeTickets, analyzeTimeline, analyzeComplexity, analyzeAge, analyzeAttrition, analyzeMessages, analyzeBurnout, analyzeTtm, analyzeZombies, analyzeMap } = require('../src');
     const hotspots = analyzeHotspots(commits);
     const busfactor = analyzeBusFactor(commits);
     const churn = analyzeChurn(commits);
@@ -201,7 +214,15 @@ switch (command) {
     const risk = analyzeRisk(hotspots, busfactor, churn, coupling);
     const health = reporter.calculateHealth(risk);
 
-    const fullData = { hotspots, busfactor, churn, coupling, ownership, contributors, languages, tickets, timeline, complexity, risk, health };
+    const age = analyzeAge(commits);
+    const attrition = analyzeAttrition(commits);
+    const messages = analyzeMessages(commits);
+    const burnout = analyzeBurnout(commits);
+    const ttm = analyzeTtm(repoPath, options);
+    const zombies = analyzeZombies(repoPath);
+    const map = analyzeMap(commits);
+
+    const fullData = { hotspots, busfactor, churn, coupling, ownership, contributors, languages, tickets, timeline, complexity, risk, health, age, attrition, messages, burnout, ttm, zombies, map };
     
     const html = server.getHtmlTemplate(fullData);
     const fs = require('fs');
@@ -258,6 +279,97 @@ switch (command) {
     else reporter.reportPrs(prs);
     break;
   }
+  case 'legacy':
+  case 'age': {
+    const { analyzeAge } = require('../src');
+    const ageData = analyzeAge(commits);
+    if (options.json) console.log(JSON.stringify(ageData, null, 2));
+    else reporter.reportAge(ageData, options.top);
+    break;
+  }
+  case 'attrition':
+  case 'orphans': {
+    const { analyzeAttrition } = require('../src');
+    const orphanedFiles = analyzeAttrition(commits);
+    if (options.json) console.log(JSON.stringify(orphanedFiles, null, 2));
+    else reporter.reportAttrition(orphanedFiles, options.top);
+    break;
+  }
+  case 'messages': {
+    const { analyzeMessages } = require('../src');
+    const msgData = analyzeMessages(commits);
+    if (options.json) console.log(JSON.stringify(msgData, null, 2));
+    else reporter.reportMessages(msgData);
+    break;
+  }
+  case 'burnout': {
+    const { analyzeBurnout } = require('../src');
+    const burnoutData = analyzeBurnout(commits);
+    if (options.json) console.log(JSON.stringify(burnoutData, null, 2));
+    else reporter.reportBurnout(burnoutData);
+    break;
+  }
+  case 'ttm': {
+    const { analyzeTtm } = require('../src');
+    const ttmData = analyzeTtm(repoPath, options);
+    if (options.json) console.log(JSON.stringify(ttmData, null, 2));
+    else reporter.reportTtm(ttmData);
+    break;
+  }
+  case 'zombies': {
+    const { analyzeZombies } = require('../src');
+    const zombies = analyzeZombies(repoPath);
+    if (options.json) console.log(JSON.stringify(zombies, null, 2));
+    else reporter.reportZombies(zombies);
+    break;
+  }
+  case 'map': {
+    const { analyzeMap } = require('../src');
+    const mapData = analyzeMap(commits);
+    if (options.json) console.log(JSON.stringify(mapData, null, 2));
+    else reporter.reportMap(mapData);
+    break;
+  }
+  case 'bot': {
+    // Generates a markdown summary tailored for GitHub Actions PR comments
+    const hotspots = analyzeHotspots(commits);
+    const busfactor = analyzeBusFactor(commits);
+    const churn = analyzeChurn(commits);
+    const coupling = analyzeCoupling(commits);
+    const risk = analyzeRisk(hotspots, busfactor, churn, coupling);
+    const health = reporter.calculateHealth(risk);
+    
+    let comment = `## 📡 RepoRadar Health Report\n\n`;
+    comment += `**Overall Health Score:** ${health.grade} (${Math.round(health.score)}/100)\n\n`;
+    
+    const criticalFiles = risk.filter(f => f.riskScore > 75).slice(0, 5);
+    if (criticalFiles.length > 0) {
+      comment += `### ⚠️ Critical Files to Review\n`;
+      for (const f of criticalFiles) {
+        comment += `- **\`${f.file}\`** (Risk: ${Math.round(f.riskScore)})\n`;
+      }
+      comment += `\n`;
+    }
+
+    const { analyzeBurnout } = require('../src');
+    const burnoutData = analyzeBurnout(commits);
+    const highRisks = burnoutData.filter(b => b.riskLevel === 'High');
+    if (highRisks.length > 0) {
+      comment += `### 🔥 Burnout Risk Detected\n`;
+      for (const b of highRisks) {
+        comment += `- ${b.author} is overworking (${b.weekendPercent}% weekend commits)\n`;
+      }
+      comment += `\n`;
+    }
+
+    if (process.env.GITHUB_STEP_SUMMARY) {
+      const fs = require('fs');
+      fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, comment);
+    } else {
+      console.log(comment);
+    }
+    break;
+  }
   case 'hotspots': {
     const hotspots = analyzeHotspots(commits);
     if (options.json) console.log(JSON.stringify(hotspots, null, 2));
@@ -299,6 +411,14 @@ switch (command) {
     console.log('    tickets           Issue tracker linkage ratio');
     console.log('    timeline          Commit activity over time');
     console.log('    prs               Pull requests & merge analysis');
+    console.log('    legacy            Find old, unmaintained "dusty" files');
+    console.log('    attrition         Find orphaned files whose authors have left');
+    console.log('    messages          Grade commit message quality');
+    console.log('    burnout           Detect developers overworking on weekends/nights');
+    console.log('    ttm               Analyze Time-To-Merge for pull requests');
+    console.log('    zombies           Find stale branches not merged to master');
+    console.log('    map               Show codebase ownership by module/directory');
+    console.log('    bot               Generate a Markdown summary for CI/CD PR comments');
     console.log('    multi             Analyze multiple repositories (--repos=)\n');
     console.log('  \x1b[1mOptions:\x1b[0m');
     console.log('    --json                      Output as JSON');
