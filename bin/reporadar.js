@@ -12,7 +12,8 @@ const options = {
   maxCommits: null,
   top: 15,
   quiet: false,
-  path: null
+  path: null,
+  watch: process.argv.includes('--watch')
 };
 
 // Parse arguments
@@ -36,8 +37,44 @@ for (let i = 0; i < args.length; i++) {
   else if (arg.startsWith('--ignore=')) options.ignore = arg.split('=')[1].split(',');
   else if (arg.startsWith('--max-commits=')) options.maxCommits = parseInt(arg.split('=')[1], 10);
   else if (arg.startsWith('--top=')) options.top = parseInt(arg.split('=')[1], 10);
+  else if (arg.startsWith('--repos=')) options.repos = arg.split('=')[1].split(',');
   else if (arg.startsWith('--path=')) options.path = arg.split('=')[1];
   else if (!arg.startsWith('--')) command = arg;
+}
+
+if (command === 'multi') {
+  if (!options.repos || options.repos.length === 0) {
+    console.error('\x1b[31mError: multi command requires --repos=path1,path2\x1b[0m');
+    process.exit(1);
+  }
+  console.log('\n  \x1b[1m\x1b[36m📡 RepoRadar — Multi-Repository Analysis\x1b[0m\n');
+  console.log('  | Repository | Health | Commits | Risk Level |');
+  console.log('  |---|---|---|---|');
+  
+  for (const rPath of options.repos) {
+    const fullPath = path.resolve(rPath.trim());
+    try {
+      const commits = getCommits(fullPath, { ...options, quiet: true });
+      if (commits.length === 0) continue;
+      const hotspots = analyzeHotspots(commits);
+      const busfactor = analyzeBusFactor(commits);
+      const churn = analyzeChurn(commits);
+      const coupling = analyzeCoupling(commits);
+      const risk = analyzeRisk(hotspots, busfactor, churn, coupling);
+      const health = reporter.calculateHealth(risk);
+      
+      const repoName = path.basename(fullPath).padEnd(20);
+      const healthStr = `${Math.round(health.score)} (${health.grade})`.padEnd(10);
+      const commitCount = String(commits.length).padEnd(8);
+      const riskSummary = risk.length > 0 ? (risk[0].riskScore > 75 ? '🔴 High' : '🟡 Medium') : '🟢 Low';
+      
+      console.log(`  | ${repoName} | ${healthStr} | ${commitCount} | ${riskSummary} |`);
+    } catch (e) {
+      console.log(`  | ${path.basename(fullPath).padEnd(20)} | Error | - | - |`);
+    }
+  }
+  console.log('');
+  process.exit(0);
 }
 
 const repoPath = options.path ? path.resolve(options.path) : process.cwd();
@@ -65,13 +102,30 @@ if (!options.json && !options.quiet) {
   if (options.ignore.length > 0) console.log(`\x1b[2mIgnoring: ${options.ignore.join(', ')}\x1b[0m`);
 }
 
-const commits = getCommits(repoPath, options);
+function runAnalysis() {
+  let spinnerTimer;
+  if (!options.json && !options.quiet) {
+    const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+    let i = 0;
+    spinnerTimer = setInterval(() => {
+      process.stdout.write(`\r\x1b[36m${frames[i]} Parsing git history...\x1b[0m`);
+      i = (i + 1) % frames.length;
+    }, 80);
+  }
 
-if (commits.length === 0) {
-  if (options.json) console.log(JSON.stringify({ error: 'No commits found' }));
-  else console.log('No commits found or not a git repository.');
-  process.exit(1);
-}
+  const commits = getCommits(repoPath, options);
+
+  if (spinnerTimer) {
+    clearInterval(spinnerTimer);
+    process.stdout.write('\r\x1b[K'); // clear line
+  }
+
+  if (commits.length === 0) {
+    if (options.json) console.log(JSON.stringify({ error: 'No commits found' }));
+    else console.log('No commits found or not a git repository.');
+    if (!options.watch) process.exit(1);
+    return;
+  }
 
 switch (command) {
   case 'scan': {
@@ -197,6 +251,13 @@ switch (command) {
     else reporter.reportComplexity(complexity, options.top);
     break;
   }
+  case 'prs': {
+    const { analyzePrs } = require('../src');
+    const prs = analyzePrs(repoPath, options);
+    if (options.json) console.log(JSON.stringify(prs, null, 2));
+    else reporter.reportPrs(prs);
+    break;
+  }
   case 'hotspots': {
     const hotspots = analyzeHotspots(commits);
     if (options.json) console.log(JSON.stringify(hotspots, null, 2));
@@ -236,7 +297,9 @@ switch (command) {
     console.log('    contributors      Contributor churn risk');
     console.log('    languages         Activity breakdown by language');
     console.log('    tickets           Issue tracker linkage ratio');
-    console.log('    timeline          Commit activity over time\n');
+    console.log('    timeline          Commit activity over time');
+    console.log('    prs               Pull requests & merge analysis');
+    console.log('    multi             Analyze multiple repositories (--repos=)\n');
     console.log('  \x1b[1mOptions:\x1b[0m');
     console.log('    --json                      Output as JSON');
     console.log('    --csv                       Output as CSV');
@@ -246,10 +309,13 @@ switch (command) {
     console.log('    --max-commits=<n>           Limit analysis to last N commits');
     console.log('    --ignore=<patterns>         Comma-separated ignore patterns');
     console.log('    --path=<dir>                Path to repository (default: cwd)');
+    console.log('    --repos=<dirs>              Comma-separated paths for "multi" command');
+    console.log('    --watch                     Watch repository for new commits');
     console.log('    --save-snapshot             Save metrics to .reporadar-snapshot.json');
     console.log('    --compare=<file>            Compare with a previous snapshot');
     console.log('    --quiet, -q                 Suppress status messages\n');
-    process.exit(0);
+    if (!options.watch) process.exit(0);
+    return;
   }
   default:
     if (options.json) {
@@ -258,5 +324,27 @@ switch (command) {
       console.error(`\x1b[31mUnknown command: ${command}\x1b[0m`);
       console.error('Run \x1b[36mreporadar --help\x1b[0m for usage.');
     }
-    process.exit(1);
+    if (!options.watch) process.exit(1);
+    return;
+}
+} // end runAnalysis()
+
+runAnalysis();
+
+if (options.watch) {
+  const fs = require('fs');
+  const watchPath = path.join(repoPath, '.git', 'refs', 'heads');
+  if (fs.existsSync(watchPath)) {
+    console.log(`\n\x1b[36m👀 Watching for new commits in ${watchPath}...\x1b[0m`);
+    let debounceTimer;
+    fs.watch(watchPath, { recursive: true }, (eventType, filename) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        console.log(`\n\x1b[33m↻ Detected new commit. Re-running analysis...\x1b[0m`);
+        runAnalysis();
+      }, 500);
+    });
+  } else {
+    console.warn(`\x1b[33mWarning: --watch requires a local .git directory. Watch mode disabled.\x1b[0m`);
+  }
 }

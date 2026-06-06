@@ -69,6 +69,23 @@ function getCommits(repoPath, options = {}) {
   }
 
   try {
+    const fs = require('fs');
+    const path = require('path');
+    const currentHead = execSync('git rev-parse HEAD', { cwd: repoPath, encoding: 'utf8' }).trim();
+    const cacheKey = currentHead + '_' + JSON.stringify({ since: options.since, ignore: options.ignore, maxCommits: options.maxCommits });
+    const cacheFile = path.join(repoPath, '.reporadar-cache.json');
+
+    if (options.cache && fs.existsSync(cacheFile)) {
+      try {
+        const cache = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+        if (cache.key === cacheKey) {
+          return cache.commits;
+        }
+      } catch (e) {
+        // ignore cache read errors
+      }
+    }
+
     let cmd = `git log --numstat --format='COMMIT:%H|%an|%aI|%s' --no-merges`;
     
     if (options.maxCommits) {
@@ -111,27 +128,38 @@ function getCommits(repoPath, options = {}) {
         // Numstat line: additions deletions filename
         const parts = line.split('\t');
         if (parts.length >= 3 && currentCommit) {
-          // Binary files show as "-\t-\tfilename" — skip them
-          if (parts[0] === '-' && parts[1] === '-') continue;
-
           const added = parseInt(parts[0], 10) || 0;
           const deleted = parseInt(parts[1], 10) || 0;
-          let file = parts.slice(2).join('\t'); // handle filenames with tabs (rare)
-
-          // Handle renamed files: "{old_path => new_path}" or "dir/{old => new}.js"
-          const renameMatch = file.match(/\{(.+?) => (.+?)\}/);
-          if (renameMatch) {
-            // Use the new name after rename
-            file = file.replace(/\{.+? => (.+?)\}/, '$1');
+          
+          let file = parts.slice(2).join('\t').trim();
+          
+          // Handle renamed files: "oldName => newName"
+          if (file.includes('=>')) {
+            const renameMatch = file.match(/^(?:.*{)?(.*?)\s*=>\s*(.*?)(?:}.*)?$/);
+            if (renameMatch) {
+              file = renameMatch[2].trim();
+            } else {
+              file = file.split('=>').pop().trim().replace(/}/g, '');
+            }
           }
-
-          // Normalize path separators
-          file = file.replace(/\\/g, '/');
-
-          currentCommit.files.push({ file, added, deleted });
+          
+          currentCommit.files.push({
+            file,
+            added,
+            deleted
+          });
         }
       }
     }
+
+    if (options.cache) {
+      try {
+        fs.writeFileSync(cacheFile, JSON.stringify({ key: cacheKey, commits }));
+      } catch (e) {
+        // ignore cache write errors
+      }
+    }
+
     return commits;
   } catch (error) {
     if (error.killed) {

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.1] - 2026-06-06
+### Added
+- **Multi-Repository Support**: New command `reporadar multi --repos=./repo1,./repo2` to generate a summary table across multiple microservices.
+- **Pull Request Analyzer**: New command `reporadar prs` to analyze merge commit frequencies and top mergers (detects CI/CD patterns vs solo coding).
+- **Watch Mode**: Added `--watch` flag to automatically re-run analysis whenever a new commit is detected.
+- **Performance**: Added `--cache` flag to cache parsed git history in `.reporadar-cache.json` for instant re-runs on large codebases.
+- **CLI Polish**: Added a beautiful animated spinner during git history parsing.
+
 ## [1.7.0] - 2026-06-06
 ### Added
 - **Dashboad Analytics**: Added Activity Timeline and Complexity Analysis charts to the web dashboard (`reporadar serve`).

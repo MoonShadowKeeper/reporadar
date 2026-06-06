@@ -297,6 +297,24 @@ function reportComplexity(complexities, limit = 15) {
   console.log('');
 }
 
+function reportPrs(prs) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Pull Requests & Merge Analysis\x1b[0m\n');
+  
+  if (prs.totalMerges === 0) {
+    console.log('  \x1b[33mNo merge commits found. Team is using fast-forward/rebase or developing solo.\x1b[0m\n');
+    return;
+  }
+
+  console.log(`  Total Merges: \x1b[1m${prs.totalMerges}\x1b[0m`);
+  console.log(`  Merges per month: \x1b[1m${prs.mergesPerMonth}\x1b[0m\n`);
+  
+  console.log('  \x1b[36mTop Mergers (Reviewers/Maintainers):\x1b[0m');
+  for (const merger of prs.topMergers) {
+    console.log(`    \x1b[32m✔\x1b[0m ${merger.author.padEnd(20)} ${merger.count} merges`);
+  }
+  console.log('');
+}
+
 module.exports = {
   reportHotspots,
   reportBusFactor,
@@ -309,6 +327,7 @@ module.exports = {
   reportTickets,
   reportTimeline,
   reportComplexity,
+  reportPrs,
   generateHtml,
   generateCsv,
   generateMd,

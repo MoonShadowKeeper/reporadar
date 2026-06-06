@@ -13,6 +13,8 @@ const { analyzeComplexity } = require('./analyzers/complexity');
 const reporter = require('./reporter');
 const server = require('./server');
 
+const { analyzePrs } = require('./analyzers/prs');
+
 module.exports = {
   getCommits,
   analyzeHotspots,
@@ -26,6 +28,7 @@ module.exports = {
   analyzeTickets,
   analyzeTimeline,
   analyzeComplexity,
+  analyzePrs,
   reporter,
   server
 };
