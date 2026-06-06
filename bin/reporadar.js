@@ -113,7 +113,7 @@ switch (command) {
     break;
   }
   case 'serve': {
-    const { server, analyzeOwnership, analyzeContributors, analyzeLanguages, analyzeTickets } = require('../src');
+    const { server, analyzeOwnership, analyzeContributors, analyzeLanguages, analyzeTickets, analyzeTimeline, analyzeComplexity } = require('../src');
     const hotspots = analyzeHotspots(commits);
     const busfactor = analyzeBusFactor(commits);
     const churn = analyzeChurn(commits);
@@ -122,16 +122,18 @@ switch (command) {
     const contributors = analyzeContributors(commits);
     const languages = analyzeLanguages(commits);
     const tickets = analyzeTickets(commits);
+    const timeline = analyzeTimeline(commits);
+    const complexity = analyzeComplexity(commits);
     const risk = analyzeRisk(hotspots, busfactor, churn, coupling);
     const health = reporter.calculateHealth(risk);
 
-    const fullData = { hotspots, busfactor, churn, coupling, ownership, contributors, languages, tickets, risk, health };
+    const fullData = { hotspots, busfactor, churn, coupling, ownership, contributors, languages, tickets, timeline, complexity, risk, health };
     
     server.startServer(fullData, options.port || 3000);
     break;
   }
   case 'html': {
-    const { server, analyzeOwnership, analyzeContributors, analyzeLanguages, analyzeTickets } = require('../src');
+    const { server, analyzeOwnership, analyzeContributors, analyzeLanguages, analyzeTickets, analyzeTimeline, analyzeComplexity } = require('../src');
     const hotspots = analyzeHotspots(commits);
     const busfactor = analyzeBusFactor(commits);
     const churn = analyzeChurn(commits);
@@ -140,10 +142,12 @@ switch (command) {
     const contributors = analyzeContributors(commits);
     const languages = analyzeLanguages(commits);
     const tickets = analyzeTickets(commits);
+    const timeline = analyzeTimeline(commits);
+    const complexity = analyzeComplexity(commits);
     const risk = analyzeRisk(hotspots, busfactor, churn, coupling);
     const health = reporter.calculateHealth(risk);
 
-    const fullData = { hotspots, busfactor, churn, coupling, ownership, contributors, languages, tickets, risk, health };
+    const fullData = { hotspots, busfactor, churn, coupling, ownership, contributors, languages, tickets, timeline, complexity, risk, health };
     
     const html = server.getHtmlTemplate(fullData);
     const fs = require('fs');

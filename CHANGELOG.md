@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2026-06-06
+### Added
+- **Dashboad Analytics**: Added Activity Timeline and Complexity Analysis charts to the web dashboard (`reporadar serve`).
+- **Codebase Ownership Chart**: Added an interactive doughnut chart showing the percentage of the codebase owned by each author.
+- **Light/Dark Mode**: Added a Theme toggle switch to the dashboard header for better readability in bright environments.
+
 ## [1.6.0] - 2026-06-06
 ### Added
 - **Timeline Analyzer**: `reporadar timeline` detects dead zones, burst zones (deadline rushes), and peak coding hours.

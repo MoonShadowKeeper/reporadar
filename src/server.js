@@ -36,11 +36,24 @@ function getHtmlTemplate(data) {
         body {
             margin: 0;
             padding: 0;
-            background: radial-gradient(circle at top right, #1e1b4b, var(--bg-dark));
-            background-attachment: fixed;
+            background: var(--bg-dark);
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.light-theme {
+            --bg-dark: #f8fafc;
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --glass-border: rgba(0, 0, 0, 0.1);
+        }
+
+        body:not(.light-theme) {
+            background: radial-gradient(circle at top right, #1e1b4b, var(--bg-dark));
+            background-attachment: fixed;
         }
 
         /* Glassmorphism utility */
@@ -65,6 +78,24 @@ function getHtmlTemplate(data) {
             top: 0;
             z-index: 100;
         }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .theme-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        .theme-btn:hover { background: rgba(255,255,255,0.1); }
 
         .logo {
             font-size: 24px;
@@ -263,8 +294,11 @@ function getHtmlTemplate(data) {
             <span class="logo-icon">📡</span>
             RepoRadar
         </div>
-        <div id="healthBadge" class="health-badge health-A">
-            Loading...
+        <div class="header-controls">
+            <button class="theme-btn" onclick="document.body.classList.toggle('light-theme')">🌓 Theme</button>
+            <div id="healthBadge" class="health-badge health-A">
+                Loading...
+            </div>
         </div>
     </header>
 
@@ -280,8 +314,21 @@ function getHtmlTemplate(data) {
             </ul>
         </div>
 
-        <!-- 2. Language Breakdown -->
+        <!-- 2. Ownership Distribution -->
         <div class="card glass animate-in" style="animation-delay: 0.2s;">
+            <div class="card-header">
+                <h2>👑 Codebase Ownership</h2>
+                <p class="subtitle">Percentage of files primarily owned by each author</p>
+            </div>
+            <div class="chart-container" style="display: flex; justify-content: center; align-items: center;">
+                <div style="width: 250px; height: 250px;">
+                    <canvas id="ownershipChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Language Breakdown -->
+        <div class="card glass animate-in" style="animation-delay: 0.3s;">
             <div class="card-header">
                 <h2>📊 Language Activity</h2>
                 <p class="subtitle">Change volume distribution</p>
@@ -291,8 +338,8 @@ function getHtmlTemplate(data) {
             </div>
         </div>
 
-        <!-- 3. Hidden Coupling Graph -->
-        <div class="card glass full-width animate-in" style="animation-delay: 0.3s;">
+        <!-- 4. Hidden Coupling Graph -->
+        <div class="card glass full-width animate-in" style="animation-delay: 0.4s;">
             <div class="card-header">
                 <h2>🕸️ Hidden Coupling (Temporal Dependencies)</h2>
                 <p class="subtitle">Files that change together in the same commits (Jaccard Index > 0.5)</p>
@@ -300,8 +347,8 @@ function getHtmlTemplate(data) {
             <div id="couplingGraph" class="d3-container"></div>
         </div>
 
-        <!-- 4. Contributor Risk (Churn) -->
-        <div class="card glass animate-in" style="animation-delay: 0.4s;">
+        <!-- 5. Contributor Risk (Churn) -->
+        <div class="card glass animate-in" style="animation-delay: 0.5s;">
             <div class="card-header">
                 <h2>👥 Contributor Churn</h2>
                 <p class="subtitle">Authors with high rewrite/delete ratios</p>
@@ -311,8 +358,8 @@ function getHtmlTemplate(data) {
             </div>
         </div>
 
-        <!-- 5. Issue Tracking -->
-        <div class="card glass animate-in" style="animation-delay: 0.5s;">
+        <!-- 6. Issue Tracking -->
+        <div class="card glass animate-in" style="animation-delay: 0.6s;">
             <div class="card-header">
                 <h2>🎫 Issue Tracker Linkage</h2>
                 <p class="subtitle">Ratio of structured vs ad-hoc development</p>
@@ -321,6 +368,28 @@ function getHtmlTemplate(data) {
                 <div style="width: 250px; height: 250px;">
                     <canvas id="ticketsChart"></canvas>
                 </div>
+            </div>
+        </div>
+
+        <!-- 7. Complexity Analysis -->
+        <div class="card glass animate-in" style="animation-delay: 0.7s;">
+            <div class="card-header">
+                <h2>🧠 Complexity Analysis</h2>
+                <p class="subtitle">Files with highest complexity scores (LOC × Churn × Authors)</p>
+            </div>
+            <div class="chart-container">
+                <canvas id="complexityChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 8. Activity Timeline -->
+        <div class="card glass animate-in" style="animation-delay: 0.8s;">
+            <div class="card-header">
+                <h2>📈 Activity Timeline</h2>
+                <p class="subtitle">Commits per month (detects dead zones & rushes)</p>
+            </div>
+            <div class="chart-container">
+                <canvas id="timelineChart"></canvas>
             </div>
         </div>
     </div>
@@ -359,7 +428,31 @@ function getHtmlTemplate(data) {
         Chart.defaults.plugins.tooltip.titleColor = '#fff';
         Chart.defaults.plugins.tooltip.padding = 12;
 
-        // 3. Language Chart (Doughnut)
+        // 3. Ownership Chart (Doughnut)
+        if (data.ownership && data.ownership.length > 0) {
+            const ownCtx = document.getElementById('ownershipChart').getContext('2d');
+            const topOwners = data.ownership.slice(0, 8);
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+            new Chart(ownCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: topOwners.map(o => o.author),
+                    datasets: [{
+                        data: topOwners.map(o => o.ownedFiles),
+                        backgroundColor: colors.slice(0, topOwners.length),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } }
+                }
+            });
+        }
+
+        // 4. Language Chart (Bar Chart)
         const langCtx = document.getElementById('languageChart').getContext('2d');
         const topLangs = data.languages.slice(0, 6);
         new Chart(langCtx, {
@@ -384,7 +477,7 @@ function getHtmlTemplate(data) {
             }
         });
 
-        // 4. Contributor Chart (Scatter)
+        // 5. Contributor Risk Chart (Scatter)
         const contCtx = document.getElementById('contributorChart').getContext('2d');
         new Chart(contCtx, {
             type: 'scatter',
@@ -422,7 +515,7 @@ function getHtmlTemplate(data) {
             }
         });
 
-        // 5. Tickets Chart (Doughnut)
+        // 6. Tickets Chart (Doughnut)
         const tickCtx = document.getElementById('ticketsChart').getContext('2d');
         new Chart(tickCtx, {
             type: 'doughnut',
@@ -444,7 +537,63 @@ function getHtmlTemplate(data) {
             }
         });
 
-        // 6. Coupling Graph (D3 Force Directed)
+        // 7. Complexity Chart (Bar Chart)
+        if (data.complexity) {
+            const compCtx = document.getElementById('complexityChart').getContext('2d');
+            const topComplexity = data.complexity.slice(0, 10);
+            new Chart(compCtx, {
+                type: 'bar',
+                data: {
+                    labels: topComplexity.map(c => c.file.split('/').pop()),
+                    datasets: [{
+                        label: 'Complexity Score',
+                        data: topComplexity.map(c => c.complexityScore),
+                        backgroundColor: topComplexity.map(c => c.category === 'critical' ? 'rgba(239, 68, 68, 0.8)' : (c.category === 'complex' ? 'rgba(245, 158, 11, 0.8)' : 'rgba(59, 130, 246, 0.8)')),
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        // 8. Timeline Chart (Line Chart)
+        if (data.timeline) {
+            const timeCtx = document.getElementById('timelineChart').getContext('2d');
+            new Chart(timeCtx, {
+                type: 'line',
+                data: {
+                    labels: data.timeline.months.map(m => m.month),
+                    datasets: [{
+                        label: 'Commits',
+                        data: data.timeline.months.map(m => m.commits),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // 9. Coupling Graph (D3 Force Directed)
         function drawCouplingGraph() {
             if(!data.coupling || data.coupling.length === 0) {
                 document.getElementById('couplingGraph').innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;">No strong coupling detected in the history.</div>';
