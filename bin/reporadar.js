@@ -8,7 +8,11 @@ let command = 'scan';
 const options = {
   json: false,
   since: null,
-  ignore: []
+  ignore: [],
+  maxCommits: null,
+  top: 15,
+  quiet: false,
+  path: null
 };
 
 // Parse arguments
@@ -26,13 +30,17 @@ for (let i = 0; i < args.length; i++) {
   else if (arg === '--csv') options.csv = true;
   else if (arg === '--md') options.md = true;
   else if (arg === '--save-snapshot') options.saveSnapshot = true;
+  else if (arg === '--quiet' || arg === '-q') options.quiet = true;
   else if (arg.startsWith('--compare=')) options.compare = arg.split('=')[1];
   else if (arg.startsWith('--since=')) options.since = arg.split('=')[1];
   else if (arg.startsWith('--ignore=')) options.ignore = arg.split('=')[1].split(',');
+  else if (arg.startsWith('--max-commits=')) options.maxCommits = parseInt(arg.split('=')[1], 10);
+  else if (arg.startsWith('--top=')) options.top = parseInt(arg.split('=')[1], 10);
+  else if (arg.startsWith('--path=')) options.path = arg.split('=')[1];
   else if (!arg.startsWith('--')) command = arg;
 }
 
-const repoPath = process.cwd();
+const repoPath = options.path ? path.resolve(options.path) : process.cwd();
 
 // Parse config file if exists
 const fs = require('fs');
@@ -50,9 +58,10 @@ for (const cp of configPaths) {
   }
 }
 
-if (!options.json) {
+if (!options.json && !options.quiet) {
   console.log(`\x1b[2mScanning repository at ${repoPath}...\x1b[0m`);
   if (options.since) console.log(`\x1b[2mTime window: since ${options.since}\x1b[0m`);
+  if (options.maxCommits) console.log(`\x1b[2mMax commits: ${options.maxCommits}\x1b[0m`);
   if (options.ignore.length > 0) console.log(`\x1b[2mIgnoring: ${options.ignore.join(', ')}\x1b[0m`);
 }
 
@@ -170,6 +179,20 @@ switch (command) {
     else reporter.reportTickets(tickets);
     break;
   }
+  case 'timeline': {
+    const { analyzeTimeline } = require('../src');
+    const timeline = analyzeTimeline(commits);
+    if (options.json) console.log(JSON.stringify(timeline, null, 2));
+    else reporter.reportTimeline(timeline);
+    break;
+  }
+  case 'complexity': {
+    const { analyzeComplexity } = require('../src');
+    const complexity = analyzeComplexity(commits);
+    if (options.json) console.log(JSON.stringify(complexity, null, 2));
+    else reporter.reportComplexity(complexity, options.top);
+    break;
+  }
   case 'hotspots': {
     const hotspots = analyzeHotspots(commits);
     if (options.json) console.log(JSON.stringify(hotspots, null, 2));
@@ -195,33 +218,41 @@ switch (command) {
     break;
   }
   case 'help': {
-    console.log('\nUsage: reporadar [command] [options]');
-    console.log('Commands: scan | serve | html | hotspots | busfactor | churn | coupling | ownership | contributors | languages | tickets');
-    console.log('Options:');
-    console.log('  --json                        Output results as JSON');
-    console.log('  --csv                         Output results as CSV');
-    console.log('  --md                          Output results as Markdown');
-    console.log('  --save-snapshot               Save current risk analysis to .reporadar-snapshot.json');
-    console.log('  --compare=<file>              Compare current risk with a previous snapshot');
-    console.log('  --since=<time>                Time window (e.g. 6.months, 1.year)');
-    console.log('  --ignore=<patterns>           Comma-separated ignore patterns (e.g. package-lock.json,dist)\n');
+    console.log('\n  \x1b[1m\x1b[36m📡 RepoRadar\x1b[0m — Git Repository Forensic Analyzer\n');
+    console.log('  \x1b[1mUsage:\x1b[0m reporadar [command] [options]\n');
+    console.log('  \x1b[1mCommands:\x1b[0m');
+    console.log('    scan              (Default) Full risk analysis with Health Score');
+    console.log('    serve             Launch interactive web dashboard');
+    console.log('    html              Export dashboard as HTML file');
+    console.log('    hotspots          Most frequently modified files');
+    console.log('    busfactor         Knowledge concentration analysis');
+    console.log('    churn             Change rate vs file age');
+    console.log('    coupling          Hidden temporal dependencies');
+    console.log('    ownership         Codebase ownership by author');
+    console.log('    contributors      Contributor churn risk');
+    console.log('    languages         Activity breakdown by language');
+    console.log('    tickets           Issue tracker linkage ratio');
+    console.log('    timeline          Commit activity over time\n');
+    console.log('  \x1b[1mOptions:\x1b[0m');
+    console.log('    --json                      Output as JSON');
+    console.log('    --csv                       Output as CSV');
+    console.log('    --md                        Output as Markdown');
+    console.log('    --top=<n>                   Show top N results (default: 15)');
+    console.log('    --since=<time>              Time window (e.g. 6.months, 1.year)');
+    console.log('    --max-commits=<n>           Limit analysis to last N commits');
+    console.log('    --ignore=<patterns>         Comma-separated ignore patterns');
+    console.log('    --path=<dir>                Path to repository (default: cwd)');
+    console.log('    --save-snapshot             Save metrics to .reporadar-snapshot.json');
+    console.log('    --compare=<file>            Compare with a previous snapshot');
+    console.log('    --quiet, -q                 Suppress status messages\n');
     process.exit(0);
   }
   default:
     if (options.json) {
       console.log(JSON.stringify({ error: `Unknown command: ${command}` }));
     } else {
-      console.log(`Unknown command: ${command}`);
-      console.log('\nUsage: reporadar [command] [options]');
-      console.log('Commands: scan | html | hotspots | busfactor | churn | coupling | ownership | contributors');
-      console.log('Options:');
-      console.log('  --json                        Output results as JSON');
-      console.log('  --csv                         Output results as CSV');
-      console.log('  --md                          Output results as Markdown');
-      console.log('  --save-snapshot               Save current risk analysis to .reporadar-snapshot.json');
-      console.log('  --compare=<file>              Compare current risk with a previous snapshot');
-      console.log('  --since=<time>                Time window (e.g. 6.months, 1.year)');
-      console.log('  --ignore=<patterns>           Comma-separated ignore patterns (e.g. package-lock.json,dist)');
+      console.error(`\x1b[31mUnknown command: ${command}\x1b[0m`);
+      console.error('Run \x1b[36mreporadar --help\x1b[0m for usage.');
     }
     process.exit(1);
 }

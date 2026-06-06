@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2026-06-06
+### Added
+- **Timeline Analyzer**: `reporadar timeline` detects dead zones, burst zones (deadline rushes), and peak coding hours.
+- **Complexity Analyzer**: `reporadar complexity` combines lines of code, churn intensity, and bus factor into a single metric.
+- **CLI Flags**: Added `--max-commits`, `--top`, `--quiet` (-q), and `--path` flags for better control.
+- **Robust Git Parsing**: Support for renamed files, shallow clone detection, binary file filtering, and timeout protection for massive repos.
+
 ## [1.5.0] - 2026-06-05
 ### Added
 - **Interactive Enterprise Dashboard**: New `serve` command launches a beautiful, local web dashboard with zero dependencies.

@@ -243,6 +243,60 @@ function reportTickets(tickets) {
   console.log('');
 }
 
+function reportTimeline(timeline) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Activity Timeline\x1b[0m\n');
+  
+  console.log(`  Average commits/month: \x1b[36m${timeline.avgCommitsPerMonth}\x1b[0m`);
+  console.log(`  Peak coding hour: \x1b[36m${timeline.peakHour}:00\x1b[0m`);
+  console.log(`  Time span: \x1b[36m${timeline.totalMonths} months\x1b[0m\n`);
+
+  // Weekday chart
+  console.log('  \x1b[1mWeekday Distribution:\x1b[0m');
+  const maxDay = Math.max(...timeline.weekdays.map(w => w.commits));
+  for (const w of timeline.weekdays) {
+    const barLen = Math.round((w.commits / Math.max(1, maxDay)) * 20);
+    const bar = '\x1b[35m' + '█'.repeat(barLen) + '░'.repeat(20 - barLen) + '\x1b[0m';
+    console.log(`  ${bar} ${w.day.padEnd(10)} ${w.percentage}%`);
+  }
+
+  // Dead zones
+  if (timeline.deadZones.length > 0) {
+    console.log(`\n  \x1b[31m\x1b[1mDead Zones (low/no activity):\x1b[0m`);
+    for (const d of timeline.deadZones.slice(0, 5)) {
+      console.log(`    \x1b[31m●\x1b[0m ${d.month} — ${d.commits} commits (${d.type})`);
+    }
+  }
+
+  // Burst zones
+  if (timeline.burstZones.length > 0) {
+    console.log(`\n  \x1b[33m\x1b[1mBurst Zones (deadline rushes):\x1b[0m`);
+    for (const b of timeline.burstZones.slice(0, 5)) {
+      console.log(`    \x1b[33m●\x1b[0m ${b.month} — ${b.commits} commits (${b.ratio}x average)`);
+    }
+  }
+  console.log('');
+}
+
+function reportComplexity(complexities, limit = 15) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Complexity Analysis\x1b[0m\n');
+
+  const top = complexities.slice(0, limit);
+  const maxScore = top.length > 0 ? top[0].complexityScore || 1 : 1;
+
+  for (const c of top) {
+    let color = '\x1b[32m';
+    if (c.category === 'critical') color = '\x1b[31m';
+    else if (c.category === 'complex') color = '\x1b[33m';
+    else if (c.category === 'moderate') color = '\x1b[36m';
+
+    const barLen = Math.round((c.complexityScore / maxScore) * 20);
+    const bar = '█'.repeat(barLen) + '░'.repeat(20 - barLen);
+    console.log(`  ${color}${bar}\x1b[0m \x1b[36m${c.complexityScore.toFixed(1).padStart(6)}\x1b[0m  ${c.file}`);
+    console.log(`       \x1b[2m~${c.estimatedLOC} LOC │ ${c.commits} commits │ ${c.authors} author(s) │ ${c.churnIntensity}x churn\x1b[0m`);
+  }
+  console.log('');
+}
+
 module.exports = {
   reportHotspots,
   reportBusFactor,
@@ -253,6 +307,8 @@ module.exports = {
   reportContributors,
   reportLanguages,
   reportTickets,
+  reportTimeline,
+  reportComplexity,
   generateHtml,
   generateCsv,
   generateMd,

@@ -8,6 +8,8 @@ const { analyzeOwnership } = require('./analyzers/ownership');
 const { analyzeContributors } = require('./analyzers/contributors');
 const { analyzeLanguages } = require('./analyzers/languages');
 const { analyzeTickets } = require('./analyzers/tickets');
+const { analyzeTimeline } = require('./analyzers/timeline');
+const { analyzeComplexity } = require('./analyzers/complexity');
 const reporter = require('./reporter');
 const server = require('./server');
 
@@ -22,6 +24,8 @@ module.exports = {
   analyzeContributors,
   analyzeLanguages,
   analyzeTickets,
+  analyzeTimeline,
+  analyzeComplexity,
   reporter,
   server
 };
