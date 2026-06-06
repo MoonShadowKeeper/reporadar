@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.3] - 2026-06-06
+### Fixed
+- Fixed GitHub Actions Node.js 20 deprecation warnings by forcing actions to Node 24 (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`).
+- Published correct GitHub repository links to the npm registry sidebar.
+
 ## [1.7.2] - 2026-06-06
 ### Added
 - **Team Burnout Risk**: New command `reporadar burnout` to detect developers consistently working on weekends or late at night.
