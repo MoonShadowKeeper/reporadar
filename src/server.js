@@ -876,7 +876,9 @@ function startServer(data, port = 3000) {
     
     // Auto-open browser
     const start = (process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open');
-    exec(`${start} ${url}`).catch(() => {});
+    exec(`${start} ${url}`, (err) => {
+      // Ignore errors if browser opening fails
+    });
   });
   
   return server;
