@@ -83,6 +83,67 @@ if (command === 'multi') {
 
 const repoPath = options.path ? path.resolve(options.path) : process.cwd();
 
+if (command === 'init') {
+  const fs = require('fs');
+  console.log('\n  \x1b[1m\x1b[36m📡 RepoRadar — Initializing...\x1b[0m\n');
+  
+  const configPath = path.join(repoPath, 'reporadar.config.json');
+  if (!fs.existsSync(configPath)) {
+    fs.writeFileSync(configPath, JSON.stringify({
+      aliases: {
+        "johndoe": ["John Doe", "john.doe@company.com"]
+      },
+      thresholds: {
+        busFactorCritical: 0,
+        hotspotMinCommits: 5,
+        churnActiveRate: 5,
+        churnTurbulentRate: 15
+      }
+    }, null, 2));
+    console.log('  \x1b[32m✓\x1b[0m Created reporadar.config.json with relaxed solo thresholds');
+  } else {
+    console.log('  \x1b[33m!\x1b[0m reporadar.config.json already exists');
+  }
+
+  const githubDir = path.join(repoPath, '.github', 'workflows');
+  const actionPath = path.join(githubDir, 'reporadar.yml');
+  if (!fs.existsSync(githubDir)) {
+    fs.mkdirSync(githubDir, { recursive: true });
+  }
+  
+  if (!fs.existsSync(actionPath)) {
+    fs.writeFileSync(actionPath, `name: RepoRadar Health Check
+on: [pull_request]
+
+jobs:
+  reporadar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Install RepoRadar
+        run: npm install -g reporadar
+        
+      - name: Generate PR Comment
+        run: reporadar bot > reporadar-report.md
+        
+      - name: Comment PR
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: reporadar-report.md
+`);
+    console.log('  \x1b[32m✓\x1b[0m Created .github/workflows/reporadar.yml for GitHub Actions');
+  } else {
+    console.log('  \x1b[33m!\x1b[0m .github/workflows/reporadar.yml already exists');
+  }
+
+  console.log('\n  \x1b[32mRepoRadar is successfully initialized! 🎉\x1b[0m');
+  console.log('  Run \x1b[36mreporadar serve\x1b[0m to view the dashboard.');
+  process.exit(0);
+}
+
 // Parse config file if exists
 const fs = require('fs');
 const configPaths = ['.reporadarrc', '.reporadarrc.json'].map(p => path.join(repoPath, p));
@@ -444,7 +505,8 @@ switch (command) {
     console.log('    zombies           Find stale branches not merged to master');
     console.log('    map               Show codebase ownership by module/directory');
     console.log('    bot               Generate a Markdown summary for CI/CD PR comments');
-    console.log('    multi             Analyze multiple repositories (--repos=)\n');
+    console.log('    multi             Analyze multiple repositories (--repos=)');
+    console.log('    init              Create config file and GitHub Actions workflow\n');
     console.log('  \x1b[1mOptions:\x1b[0m');
     console.log('    --json                      Output as JSON');
     console.log('    --csv                       Output as CSV');

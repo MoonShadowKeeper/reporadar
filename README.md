@@ -39,6 +39,7 @@ Run commands inside any Git repository.
 
 | Command | Description |
 |---|---|
+| `reporadar init` | **(NEW)** Creates config file and GitHub Actions integration automatically. |
 | `reporadar scan` | **(Default)** Runs all analyzers and calculates an overall Health Score (A-F). |
 | `reporadar serve` | Launches a local Web Dashboard with interactive D3.js and Chart.js graphs. |
 | `reporadar html` | Generates the interactive HTML dashboard to a file (`reporadar-report.html`). |
