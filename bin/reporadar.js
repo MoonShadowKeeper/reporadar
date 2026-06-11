@@ -250,6 +250,24 @@ switch (command) {
     else reporter.reportContributors(contributors);
     break;
   }
+  case 'worktypes': {
+    const { analyzeWorkTypes } = require('../src');
+    const worktypes = analyzeWorkTypes(commits);
+    if (options.json) {
+      console.log(JSON.stringify(worktypes, null, 2));
+    } else {
+      console.log('\n  \x1b[1m\x1b[36mReporadar — Work Types (Context) 🏷️\x1b[0m\n');
+      console.log(`  \x1b[34mFeat:\x1b[0m     ${worktypes.percentages.feat}% (${worktypes.distribution.feat})`);
+      console.log(`  \x1b[31mFix:\x1b[0m      ${worktypes.percentages.fix}% (${worktypes.distribution.fix})`);
+      console.log(`  \x1b[32mRefactor:\x1b[0m ${worktypes.percentages.refactor}% (${worktypes.distribution.refactor})`);
+      console.log(`  \x1b[35mChore:\x1b[0m    ${worktypes.percentages.chore}% (${worktypes.distribution.chore})`);
+      console.log(`  \x1b[36mDocs:\x1b[0m     ${worktypes.percentages.docs}% (${worktypes.distribution.docs})`);
+      console.log(`  \x1b[33mTest:\x1b[0m     ${worktypes.percentages.test}% (${worktypes.distribution.test})`);
+      console.log(`  \x1b[37mOther:\x1b[0m    ${worktypes.percentages.other}% (${worktypes.distribution.other})`);
+      console.log('\n  Total commits analyzed: ' + worktypes.total + '\n');
+    }
+    break;
+  }
   case 'languages': {
     const { analyzeLanguages } = require('../src');
     const languages = analyzeLanguages(commits);
@@ -412,7 +430,8 @@ switch (command) {
     console.log('    churn             Change rate vs file age');
     console.log('    coupling          Hidden temporal dependencies');
     console.log('    ownership         Codebase ownership by author');
-    console.log('    contributors      Contributor churn risk');
+    console.log('    contributors      Identify refactoring heroes 🦸');
+    console.log('    worktypes         Categorize commits by context (feat/fix/etc)');
     console.log('    languages         Activity breakdown by language');
     console.log('    tickets           Issue tracker linkage ratio');
     console.log('    timeline          Commit activity over time');
@@ -430,6 +449,8 @@ switch (command) {
     console.log('    --json                      Output as JSON');
     console.log('    --csv                       Output as CSV');
     console.log('    --md                        Output as Markdown');
+    console.log('    --ignore-bots               Filter out bots and auto-formatting');
+    console.log('    --include-vendor            Include vendor code (node_modules, etc)');
     console.log('    --top=<n>                   Show top N results (default: 15)');
     console.log('    --since=<time>              Time window (e.g. 6.months, 1.year)');
     console.log('    --max-commits=<n>           Limit analysis to last N commits');

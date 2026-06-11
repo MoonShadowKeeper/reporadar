@@ -15,6 +15,7 @@ const { analyzeBusFactor } = require('../src/analyzers/busfactor');
 const { analyzeChurn } = require('../src/analyzers/churn');
 const { analyzeCoupling } = require('../src/analyzers/coupling');
 const { analyzeRisk } = require('../src/analyzers/risk');
+const { analyzeWorkTypes } = require('../src/analyzers/worktypes');
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
 const COLOR = {
@@ -571,6 +572,27 @@ async function main() {
           validLevels.includes(level),
           `level should be one of ${validLevels.join('/')}, got: ${level}`
         );
+      }
+    });
+
+    await runner.run('analyzeWorkTypes categorizes commits correctly', async () => {
+      const commits = await getCommits(tempDir);
+      const result = await analyzeWorkTypes(commits);
+      
+      assert.ok(result.total > 0, 'Should have analyzed at least one commit');
+      assert.ok(result.distribution.feat !== undefined, 'Distribution should have feat count');
+      assert.ok(result.percentages.feat !== undefined, 'Should have percentages calculated');
+    });
+
+    await runner.run('analyzeContributors returns refactoring heroes', async () => {
+      const { analyzeContributors } = require('../src/analyzers/contributors');
+      const commits = await getCommits(tempDir);
+      const result = await analyzeContributors(commits);
+      
+      assert.ok(Array.isArray(result), 'Should return array of heroes');
+      if (result.length > 0) {
+        assert.ok(result[0].heroScore !== undefined, 'Hero score should be defined');
+        assert.ok(result[0].refactors !== undefined, 'Refactors should be counted');
       }
     });
 

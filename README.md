@@ -47,7 +47,8 @@ Run commands inside any Git repository.
 | `reporadar churn` | Measures change rate relative to file age (stable vs active vs turbulent). |
 | `reporadar coupling` | Finds files that frequently co-change in the same commits (hidden dependencies). |
 | `reporadar ownership` | Analyzes which authors "own" the codebase based on impact volume. |
-| `reporadar contributors`| Identifies authors with high churn/rewrite risk ratios. |
+| `reporadar contributors`| Identifies Refactoring Heroes 🦸 who reduce complexity and fix bugs. |
+| `reporadar worktypes` | Categorizes commits by semantic context (feat, fix, refactor, chore). |
 | `reporadar languages` | Analyzes commit volume distributed by programming language. |
 | `reporadar tickets`   | Measures the ratio of commits linked to issue trackers (Jira/GitHub). |
 | `reporadar prs`       | Analyzes pull requests, merge commits, and CI/CD patterns vs solo coding. |
@@ -63,6 +64,8 @@ All commands support the following flags to customize the analysis:
 
 - `--json`: Output raw JSON instead of human-readable text. Perfect for CI/CD pipelines.
 - `--ignore="pattern"`: Comma-separated list of ignore patterns (e.g., `--ignore="package-lock.json,dist"`).
+- `--ignore-bots`: Automatically filters out commits from dependabot, github-actions, [bot], and auto-formatting (e.g. `chore: lint`).
+- `--include-vendor`: Disables the default ignoring of vendor code (`node_modules/`, `vendor/`, `dist/`).
 - `--since="time"`: Time window to analyze (e.g., `--since="6.months"`, `--since="1.year"`).
 - `--cache`: Caches the parsed git history for instant re-runs on large codebases.
 - `--watch`: Keeps the process alive and automatically re-runs analysis on new commits.
