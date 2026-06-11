@@ -213,6 +213,9 @@ switch (command) {
       console.log(reporter.generateMd(risk));
     } else {
       reporter.reportRisk(risk);
+      const { analyzeWorkTypes } = require('../src');
+      const worktypes = analyzeWorkTypes(commits);
+      reporter.reportWorkTypes(worktypes);
     }
 
     if (options.saveSnapshot) {

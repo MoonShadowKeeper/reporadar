@@ -458,6 +458,19 @@ function reportMap(mapData) {
   }
   console.log('');
 }
+function reportWorkTypes(wt) {
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Work Types (Context) 🏷️\x1b[0m\n');
+  if (wt.total === 0) {
+    console.log('  \x1b[33mNot enough data.\x1b[0m\n');
+    return;
+  }
+  console.log(`  \x1b[34mFeat:\x1b[0m     ${wt.percentages.feat}% (${wt.distribution.feat})`);
+  console.log(`  \x1b[31mFix:\x1b[0m      ${wt.percentages.fix}% (${wt.distribution.fix})`);
+  console.log(`  \x1b[32mRefactor:\x1b[0m ${wt.percentages.refactor}% (${wt.distribution.refactor})`);
+  console.log(`  \x1b[35mChore:\x1b[0m    ${wt.percentages.chore}% (${wt.distribution.chore})`);
+  console.log(`  \x1b[36mDocs:\x1b[0m     ${wt.percentages.docs}% (${wt.distribution.docs})`);
+  console.log('');
+}
 
 module.exports = {
   reportHotspots,
@@ -479,6 +492,7 @@ module.exports = {
   reportTtm,
   reportZombies,
   reportMap,
+  reportWorkTypes,
   generateHtml,
   generateCsv,
   generateMd,
