@@ -2,5 +2,10 @@
   "aliases": {
     "moonshadowkeeper": ["MoonShadowKeeper", "moonshadow"]
   },
-  "thresholds": {}
+  "thresholds": {
+    "busFactorCritical": 0,
+    "hotspotMinCommits": 10,
+    "churnActiveRate": 10,
+    "churnTurbulentRate": 30
+  }
 }

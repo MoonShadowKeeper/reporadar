@@ -292,10 +292,21 @@ function getHtmlTemplate(data) {
     <header>
         <div class="logo">
             <span class="logo-icon">📡</span>
-            RepoRadar
+            <span data-i18n="title">RepoRadar</span>
+        </div>
+        <div style="display: flex; gap: 15px; overflow-x: auto; padding: 0 20px;">
+            <a href="#hotspots" style="color: var(--text-main); text-decoration: none; font-size: 14px;" data-i18n="nav_hotspots">Hotspots</a>
+            <a href="#ownership" style="color: var(--text-main); text-decoration: none; font-size: 14px;" data-i18n="nav_ownership">Ownership</a>
+            <a href="#heroes" style="color: var(--text-main); text-decoration: none; font-size: 14px;" data-i18n="nav_heroes">Heroes</a>
+            <a href="#worktypes" style="color: var(--text-main); text-decoration: none; font-size: 14px;" data-i18n="nav_worktypes">Work Types</a>
+            <a href="#complexity" style="color: var(--text-main); text-decoration: none; font-size: 14px;" data-i18n="nav_complexity">Complexity</a>
         </div>
         <div class="header-controls">
-            <button class="theme-btn" onclick="document.body.classList.toggle('light-theme')">🌓 Theme</button>
+            <select id="langSelect" onchange="changeLanguage(this.value)" class="theme-btn" style="border:none; outline:none;">
+                <option value="en">🇬🇧 EN</option>
+                <option value="ru">🇷🇺 RU</option>
+            </select>
+            <button class="theme-btn" onclick="document.body.classList.toggle('light-theme')" data-i18n="theme_btn">🌓 Theme</button>
             <div id="healthBadge" class="health-badge health-A">
                 Loading...
             </div>
@@ -303,55 +314,37 @@ function getHtmlTemplate(data) {
     </header>
 
     <div class="container">
-        <!-- 1. Risk Overview -->
-        <div class="card glass animate-in" style="animation-delay: 0.1s;">
+        <div class="card glass animate-in full-width" id="hotspots" style="animation-delay: 0.1s;">
             <div class="card-header">
-                <h2>⚠️ Highest Risk Files</h2>
-                <p class="subtitle">Files demanding architectural refactoring</p>
+                <h2 data-i18n="hotspots_title">⚠️ Highest Risk Files</h2>
+                <p class="subtitle" data-i18n="hotspots_subtitle">Files demanding architectural refactoring</p>
             </div>
-            <ul class="risk-list" id="riskList">
-                <!-- Populated by JS -->
-            </ul>
+            <ul class="risk-list" id="hotspotsList"></ul>
         </div>
 
-        <!-- 2. Ownership Distribution -->
-        <div class="card glass animate-in" style="animation-delay: 0.2s;">
+        <div class="card glass animate-in" id="ownership" style="animation-delay: 0.2s;">
             <div class="card-header">
-                <h2>👑 Codebase Ownership</h2>
-                <p class="subtitle">Percentage of files primarily owned by each author</p>
-            </div>
-            <div class="chart-container" style="display: flex; justify-content: center; align-items: center;">
-                <div style="width: 250px; height: 250px;">
-                    <canvas id="ownershipChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. Language Breakdown -->
-        <div class="card glass animate-in" style="animation-delay: 0.3s;">
-            <div class="card-header">
-                <h2>📊 Language Activity</h2>
-                <p class="subtitle">Change volume distribution</p>
+                <h2 data-i18n="ownership_title">👑 Codebase Ownership</h2>
+                <p class="subtitle" data-i18n="ownership_subtitle">Percentage of files primarily owned by each author</p>
             </div>
             <div class="chart-container">
-                <canvas id="languageChart"></canvas>
+                <canvas id="ownershipChart"></canvas>
             </div>
         </div>
 
-        <!-- 4. Hidden Coupling Graph -->
-        <div class="card glass full-width animate-in" style="animation-delay: 0.4s;">
+        <div class="card glass animate-in" id="coupling" style="animation-delay: 0.4s;">
             <div class="card-header">
-                <h2>🕸️ Hidden Coupling (Temporal Dependencies)</h2>
-                <p class="subtitle">Files that change together in the same commits (Jaccard Index > 0.5)</p>
+                <h2 data-i18n="coupling_title">🔗 Hidden Coupling</h2>
+                <p class="subtitle" data-i18n="coupling_subtitle">Files that change together in the same commits (Jaccard Index > 0.5)</p>
             </div>
             <div id="couplingGraph" class="d3-container"></div>
         </div>
 
         <!-- 5. Refactoring Heroes -->
-        <div class="card glass animate-in" style="animation-delay: 0.5s;">
+        <div class="card glass animate-in" id="heroes" style="animation-delay: 0.5s;">
             <div class="card-header">
-                <h2>🦸 Refactoring Heroes</h2>
-                <p class="subtitle">Developers fixing hotspots and reducing complexity</p>
+                <h2 data-i18n="heroes_title">🦸 Refactoring Heroes</h2>
+                <p class="subtitle" data-i18n="heroes_subtitle">Developers fixing hotspots and reducing complexity</p>
             </div>
             <div class="chart-container">
                 <canvas id="contributorChart"></canvas>
@@ -372,10 +365,10 @@ function getHtmlTemplate(data) {
         </div>
 
         <!-- Work Types -->
-        <div class="card glass animate-in" style="animation-delay: 0.65s;">
+        <div class="card glass animate-in" id="worktypes" style="animation-delay: 0.65s;">
             <div class="card-header">
-                <h2>🏷️ Work Types (Context)</h2>
-                <p class="subtitle">Commit categories based on semantic messages</p>
+                <h2 data-i18n="worktypes_title">🏷️ Work Types (Context)</h2>
+                <p class="subtitle" data-i18n="worktypes_subtitle">Commit categories based on semantic messages</p>
             </div>
             <div style="margin-top: 20px;">
                 <div class="progress-bar" style="height: 24px; display: flex; margin-bottom: 15px;">
@@ -395,10 +388,10 @@ function getHtmlTemplate(data) {
         </div>
 
         <!-- 7. Complexity Analysis -->
-        <div class="card glass animate-in" style="animation-delay: 0.7s;">
+        <div class="card glass animate-in" id="complexity" style="animation-delay: 0.7s;">
             <div class="card-header">
-                <h2>🧠 Complexity Analysis</h2>
-                <p class="subtitle">Files with highest complexity scores (LOC × Churn × Authors)</p>
+                <h2 data-i18n="complexity_title">🧠 Complexity Analysis</h2>
+                <p class="subtitle" data-i18n="complexity_subtitle">Files with highest complexity scores (LOC × Churn × Authors)</p>
             </div>
             <div class="chart-container">
                 <canvas id="complexityChart"></canvas>
@@ -468,7 +461,7 @@ function getHtmlTemplate(data) {
         healthEl.innerHTML = 'Health Score: ' + data.health.grade + ' (' + Math.round(data.health.score) + '/100)';
 
         // 2. Risk List
-        const riskList = document.getElementById('riskList');
+        const riskList = document.getElementById('hotspotsList');
         data.risk.slice(0, 15).forEach(f => {
             const li = document.createElement('li');
             li.className = 'risk-item';
@@ -856,6 +849,70 @@ function getHtmlTemplate(data) {
 
         // Draw graph after DOM load
         setTimeout(drawCouplingGraph, 100);
+        
+        // --- i18n Translation Logic ---
+        const translations = {
+            en: {
+                title: 'RepoRadar',
+                nav_hotspots: 'Hotspots',
+                nav_ownership: 'Ownership',
+                nav_heroes: 'Heroes',
+                nav_worktypes: 'Work Types',
+                nav_complexity: 'Complexity',
+                theme_btn: '🌓 Theme',
+                hotspots_title: '⚠️ Highest Risk Files',
+                hotspots_subtitle: 'Files demanding architectural refactoring',
+                ownership_title: '👑 Codebase Ownership',
+                ownership_subtitle: 'Percentage of files primarily owned by each author',
+                coupling_title: '🔗 Hidden Coupling',
+                coupling_subtitle: 'Files that change together in the same commits (Jaccard Index > 0.5)',
+                heroes_title: '🦸 Refactoring Heroes',
+                heroes_subtitle: 'Developers fixing hotspots and reducing complexity',
+                worktypes_title: '🏷️ Work Types (Context)',
+                worktypes_subtitle: 'Commit categories based on semantic messages',
+                complexity_title: '🧠 Complexity Analysis',
+                complexity_subtitle: 'Files with highest complexity scores (LOC × Churn × Authors)'
+            },
+            ru: {
+                title: 'RepoRadar (Радар)',
+                nav_hotspots: 'Горячие точки',
+                nav_ownership: 'Владельцы',
+                nav_heroes: 'Герои',
+                nav_worktypes: 'Типы задач',
+                nav_complexity: 'Сложность',
+                theme_btn: '🌓 Тема',
+                hotspots_title: '⚠️ Файлы Высокого Риска',
+                hotspots_subtitle: 'Файлы, требующие архитектурного рефакторинга',
+                ownership_title: '👑 Владение Кодом',
+                ownership_subtitle: 'Процент файлов, принадлежащих каждому автору',
+                coupling_title: '🔗 Скрытые Связи',
+                coupling_subtitle: 'Файлы, которые часто меняются вместе',
+                heroes_title: '🦸 Герои Рефакторинга',
+                heroes_subtitle: 'Разработчики, устраняющие технический долг',
+                worktypes_title: '🏷️ Контекст Работы',
+                worktypes_subtitle: 'Категории коммитов на основе семантики',
+                complexity_title: '🧠 Анализ Сложности',
+                complexity_subtitle: 'Файлы с самым высоким показателем сложности'
+            }
+        };
+
+        function changeLanguage(lang) {
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if(translations[lang] && translations[lang][key]) {
+                    el.innerText = translations[lang][key];
+                }
+            });
+        }
+        
+        // Initialize lang based on browser default
+        const userLang = navigator.language || navigator.userLanguage;
+        if (userLang.startsWith('ru')) {
+            document.getElementById('langSelect').value = 'ru';
+            changeLanguage('ru');
+        }
+
     </script>
 </body>
 </html>`;
