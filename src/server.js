@@ -371,6 +371,29 @@ function getHtmlTemplate(data) {
             </div>
         </div>
 
+        <!-- Work Types -->
+        <div class="card glass animate-in" style="animation-delay: 0.65s;">
+            <div class="card-header">
+                <h2>🏷️ Work Types (Context)</h2>
+                <p class="subtitle">Commit categories based on semantic messages</p>
+            </div>
+            <div style="margin-top: 20px;">
+                <div class="progress-bar" style="height: 24px; display: flex; margin-bottom: 15px;">
+                    <div style="width: ${data.worktypes.percentages.feat}%; background: #3b82f6; height: 100%; border-radius: 4px 0 0 4px;" title="Features: ${data.worktypes.percentages.feat}%"></div>
+                    <div style="width: ${data.worktypes.percentages.fix}%; background: #ef4444; height: 100%;" title="Bugfixes: ${data.worktypes.percentages.fix}%"></div>
+                    <div style="width: ${data.worktypes.percentages.refactor}%; background: #10b981; height: 100%;" title="Refactor: ${data.worktypes.percentages.refactor}%"></div>
+                    <div style="width: ${data.worktypes.percentages.chore}%; background: #8b5cf6; height: 100%;" title="Chores: ${data.worktypes.percentages.chore}%"></div>
+                    <div style="width: ${100 - data.worktypes.percentages.feat - data.worktypes.percentages.fix - data.worktypes.percentages.refactor - data.worktypes.percentages.chore}%; background: #6b7280; height: 100%; border-radius: 0 4px 4px 0;" title="Other"></div>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; font-size: 14px; color: #a1a1aa; justify-content: center;">
+                    <div style="display: flex; align-items: center; gap: 5px;"><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#3b82f6;"></span> Feat (${data.worktypes.percentages.feat}%)</div>
+                    <div style="display: flex; align-items: center; gap: 5px;"><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#ef4444;"></span> Fix (${data.worktypes.percentages.fix}%)</div>
+                    <div style="display: flex; align-items: center; gap: 5px;"><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#10b981;"></span> Refactor (${data.worktypes.percentages.refactor}%)</div>
+                    <div style="display: flex; align-items: center; gap: 5px;"><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#8b5cf6;"></span> Chore (${data.worktypes.percentages.chore}%)</div>
+                </div>
+            </div>
+        </div>
+
         <!-- 7. Complexity Analysis -->
         <div class="card glass animate-in" style="animation-delay: 0.7s;">
             <div class="card-header">

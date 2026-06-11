@@ -72,7 +72,7 @@ function getCommits(repoPath, options = {}) {
     const fs = require('fs');
     const path = require('path');
     const currentHead = execSync('git rev-parse HEAD', { cwd: repoPath, encoding: 'utf8' }).trim();
-    const cacheKey = currentHead + '_' + JSON.stringify({ since: options.since, ignore: options.ignore, maxCommits: options.maxCommits });
+    const cacheKey = currentHead + '_' + JSON.stringify({ since: options.since, ignore: options.ignore, maxCommits: options.maxCommits, ignoreBots: options.ignoreBots, ignoreVendor: options.ignoreVendor });
     const cacheFile = path.join(repoPath, '.reporadar-cache.json');
 
     if (options.cache && fs.existsSync(cacheFile)) {
@@ -148,6 +148,33 @@ function getCommits(repoPath, options = {}) {
             added,
             deleted
           });
+        }
+      }
+    }
+
+    if (options.ignoreBots) {
+      const isBot = (author) => author.includes('[bot]') || author.includes('dependabot') || author.includes('github-actions') || author.includes('snyk') || author.includes('renovate');
+      const isAutoFormat = (msg) => {
+        const m = msg.toLowerCase();
+        return m.startsWith('chore: lint') || m.startsWith('style:') || m.startsWith('format:') || m.includes('auto-formatting') || m.includes('auto format');
+      };
+      
+      const beforeCount = commits.length;
+      for (let i = commits.length - 1; i >= 0; i--) {
+        const c = commits[i];
+        if (isBot(c.author) || isAutoFormat(c.message)) {
+          commits.splice(i, 1);
+        }
+      }
+    }
+
+    if (options.ignoreVendor !== false) {
+      const vendorPatterns = ['vendor/', 'node_modules/', 'dist/', 'build/', '.min.js', '.bundle.js', 'package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', '.DS_Store'];
+      for (let i = commits.length - 1; i >= 0; i--) {
+        const c = commits[i];
+        c.files = c.files.filter(f => !vendorPatterns.some(p => f.file.includes(p)));
+        if (c.files.length === 0) {
+          commits.splice(i, 1); // remove commit if all files were vendor files
         }
       }
     }

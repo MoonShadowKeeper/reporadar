@@ -13,6 +13,8 @@ const options = {
   top: 15,
   quiet: false,
   path: null,
+  ignoreBots: false,
+  ignoreVendor: true,
   watch: process.argv.includes('--watch')
 };
 
@@ -39,6 +41,8 @@ for (let i = 0; i < args.length; i++) {
   else if (arg.startsWith('--top=')) options.top = parseInt(arg.split('=')[1], 10);
   else if (arg.startsWith('--repos=')) options.repos = arg.split('=')[1].split(',');
   else if (arg.startsWith('--path=')) options.path = arg.split('=')[1];
+  else if (arg === '--ignore-bots') options.ignoreBots = true;
+  else if (arg === '--include-vendor') options.ignoreVendor = false;
   else if (!arg.startsWith('--')) command = arg;
 }
 
@@ -172,7 +176,7 @@ switch (command) {
     break;
   }
   case 'serve': {
-    const { server, analyzeOwnership, analyzeContributors, analyzeLanguages, analyzeTickets, analyzeTimeline, analyzeComplexity, analyzeAge, analyzeAttrition, analyzeMessages, analyzeBurnout, analyzeTtm, analyzeZombies, analyzeMap } = require('../src');
+    const { server, analyzeOwnership, analyzeContributors, analyzeLanguages, analyzeTickets, analyzeTimeline, analyzeComplexity, analyzeAge, analyzeAttrition, analyzeMessages, analyzeBurnout, analyzeTtm, analyzeZombies, analyzeMap, analyzeWorkTypes } = require('../src');
     const hotspots = analyzeHotspots(commits);
     const busfactor = analyzeBusFactor(commits);
     const churn = analyzeChurn(commits);
@@ -193,14 +197,15 @@ switch (command) {
     const ttm = analyzeTtm(repoPath, options);
     const zombies = analyzeZombies(repoPath);
     const map = analyzeMap(commits);
+    const worktypes = analyzeWorkTypes(commits);
 
-    const fullData = { hotspots, busfactor, churn, coupling, ownership, contributors, languages, tickets, timeline, complexity, risk, health, age, attrition, messages, burnout, ttm, zombies, map };
+    const fullData = { hotspots, busfactor, churn, coupling, ownership, contributors, languages, tickets, timeline, complexity, risk, health, age, attrition, messages, burnout, ttm, zombies, map, worktypes };
     
     server.startServer(fullData, options.port || 3000);
     break;
   }
   case 'html': {
-    const { server, analyzeOwnership, analyzeContributors, analyzeLanguages, analyzeTickets, analyzeTimeline, analyzeComplexity, analyzeAge, analyzeAttrition, analyzeMessages, analyzeBurnout, analyzeTtm, analyzeZombies, analyzeMap } = require('../src');
+    const { server, analyzeOwnership, analyzeContributors, analyzeLanguages, analyzeTickets, analyzeTimeline, analyzeComplexity, analyzeAge, analyzeAttrition, analyzeMessages, analyzeBurnout, analyzeTtm, analyzeZombies, analyzeMap, analyzeWorkTypes } = require('../src');
     const hotspots = analyzeHotspots(commits);
     const busfactor = analyzeBusFactor(commits);
     const churn = analyzeChurn(commits);
@@ -221,8 +226,9 @@ switch (command) {
     const ttm = analyzeTtm(repoPath, options);
     const zombies = analyzeZombies(repoPath);
     const map = analyzeMap(commits);
+    const worktypes = analyzeWorkTypes(commits);
 
-    const fullData = { hotspots, busfactor, churn, coupling, ownership, contributors, languages, tickets, timeline, complexity, risk, health, age, attrition, messages, burnout, ttm, zombies, map };
+    const fullData = { hotspots, busfactor, churn, coupling, ownership, contributors, languages, tickets, timeline, complexity, risk, health, age, attrition, messages, burnout, ttm, zombies, map, worktypes };
     
     const html = server.getHtmlTemplate(fullData);
     const fs = require('fs');

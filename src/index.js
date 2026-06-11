@@ -20,6 +20,7 @@ const { analyzeMessages } = require('./analyzers/messages');
 const { analyzeBurnout } = require('./analyzers/burnout');
 const { analyzeTtm } = require('./analyzers/ttm');
 const { analyzeZombies } = require('./analyzers/zombies');
+const { analyzeWorkTypes } = require('./analyzers/worktypes');
 const { analyzeMap } = require('./analyzers/map');
 const { loadConfig, applyAliases } = require('./config');
 
@@ -43,6 +44,7 @@ module.exports = {
   analyzeBurnout,
   analyzeTtm,
   analyzeZombies,
+  analyzeWorkTypes,
   analyzeMap,
   reporter,
   server,
