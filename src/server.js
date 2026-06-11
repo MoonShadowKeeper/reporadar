@@ -347,11 +347,11 @@ function getHtmlTemplate(data) {
             <div id="couplingGraph" class="d3-container"></div>
         </div>
 
-        <!-- 5. Contributor Risk (Churn) -->
+        <!-- 5. Refactoring Heroes -->
         <div class="card glass animate-in" style="animation-delay: 0.5s;">
             <div class="card-header">
-                <h2>👥 Contributor Churn</h2>
-                <p class="subtitle">Authors with high rewrite/delete ratios</p>
+                <h2>🦸 Refactoring Heroes</h2>
+                <p class="subtitle">Developers fixing hotspots and reducing complexity</p>
             </div>
             <div class="chart-container">
                 <canvas id="contributorChart"></canvas>
@@ -541,22 +541,23 @@ function getHtmlTemplate(data) {
             }
         });
 
-        // 5. Contributor Risk Chart (Scatter)
+        // 5. Refactoring Heroes Chart (Scatter)
         const contCtx = document.getElementById('contributorChart').getContext('2d');
         new Chart(contCtx, {
             type: 'scatter',
             data: {
                 datasets: [{
-                    label: 'Contributors',
+                    label: 'Refactoring Hero Score',
                     data: data.contributors.map(c => ({
                         x: c.commits,
-                        y: c.churnRatio,
+                        y: c.heroScore || 0,
                         author: c.author,
-                        score: c.riskScore
+                        refactors: c.refactors || 0,
+                        fixes: c.fixes || 0
                     })),
                     backgroundColor: ctx => {
                         const val = ctx.raw?.y || 0;
-                        return val > 50 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(16, 185, 129, 0.8)';
+                        return val > 30 ? 'rgba(59, 130, 246, 0.8)' : 'rgba(16, 185, 129, 0.8)';
                     },
                     pointRadius: 6,
                     pointHoverRadius: 8
@@ -568,13 +569,13 @@ function getHtmlTemplate(data) {
                 plugins: {
                     tooltip: {
                         callbacks: {
-                            label: (ctx) => \`\${ctx.raw.author}: \${ctx.raw.y}% Churn (\${ctx.raw.x} Commits)\`
+                            label: (ctx) => \`\${ctx.raw.author}: \${ctx.raw.y} Score (\${ctx.raw.refactors} Refactors)\`
                         }
                     }
                 },
                 scales: {
                     x: { title: { display: true, text: 'Total Commits' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                    y: { title: { display: true, text: 'Churn Ratio (%)' }, grid: { color: 'rgba(255,255,255,0.05)' }, min: 0, max: 100 }
+                    y: { title: { display: true, text: 'Hero Score' }, grid: { color: 'rgba(255,255,255,0.05)' }, min: 0 }
                 }
             }
         });

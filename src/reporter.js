@@ -205,19 +205,20 @@ function reportOwnership(ownerships, limit = 15) {
 }
 
 function reportContributors(contributors, limit = 15) {
-  console.log('\n  \x1b[1m\x1b[36mReporadar — Contributor Risk Analysis\x1b[0m\n');
+  console.log('\n  \x1b[1m\x1b[36mReporadar — Refactoring Heroes 🦸\x1b[0m\n');
   
   const top = contributors.slice(0, limit);
 
   for (const c of top) {
     let color = '\x1b[32m'; // green
-    if (c.riskScore >= 60) color = '\x1b[31m'; // red
-    else if (c.riskScore >= 40) color = '\x1b[33m'; // yellow
+    if (c.heroScore >= 60) color = '\x1b[34m'; // blue/cyan for very high
+    else if (c.heroScore >= 40) color = '\x1b[32m'; // green
+    else color = '\x1b[33m'; // yellow
     
-    const barLength = Math.round((c.riskScore / 100) * 20);
+    const barLength = Math.round((Math.min(c.heroScore, 100) / 100) * 20);
     const bar = '█'.repeat(barLength) + '░'.repeat(20 - barLength);
     
-    console.log(`  ${color}${bar}\x1b[0m \x1b[36m${c.author.padEnd(20)}\x1b[0m ${c.churnRatio}% churn ratio (\x1b[33m${c.commits}\x1b[0m commits)`);
+    console.log(`  ${color}${bar}\x1b[0m \x1b[36m${c.author.padEnd(20)}\x1b[0m ${c.heroScore} score (\x1b[33m${c.refactors}\x1b[0m refactors, \x1b[33m${c.fixes}\x1b[0m fixes)`);
   }
   console.log('');
 }
