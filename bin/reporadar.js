@@ -436,13 +436,34 @@ switch (command) {
       comment += `\n`;
     }
 
+
+
+    const { analyzeContributors, analyzeWorkTypes } = require('../src');
+    const heroes = analyzeContributors(commits);
+    const topHeroes = heroes.filter(h => h.heroScore >= 30).slice(0, 3);
+    if (topHeroes.length > 0) {
+      comment += `### 🦸 Refactoring Heroes\n`;
+      for (const h of topHeroes) {
+        comment += `- **${h.author}** (Score: ${h.heroScore}, Refactors: ${h.refactors})\n`;
+      }
+      comment += `\n`;
+    }
+
+    const wt = analyzeWorkTypes(commits);
+    if (wt.total > 0) {
+      comment += `### 🏷️ Work Types (Context)\n`;
+      comment += `- 🔵 Feat: ${wt.percentages.feat}%\n`;
+      comment += `- 🔴 Fix: ${wt.percentages.fix}%\n`;
+      comment += `- 🟢 Refactor: ${wt.percentages.refactor}%\n\n`;
+    }
+
     const { analyzeBurnout } = require('../src');
     const burnoutData = analyzeBurnout(commits);
     const highRisks = burnoutData.filter(b => b.riskLevel === 'High');
     if (highRisks.length > 0) {
       comment += `### 🔥 Burnout Risk Detected\n`;
       for (const b of highRisks) {
-        comment += `- ${b.author} is overworking (${b.weekendPercent}% weekend commits)\n`;
+        comment += `- **${b.author}** is overworking (${b.weekendPercent}% weekend commits)\n`;
       }
       comment += `\n`;
     }

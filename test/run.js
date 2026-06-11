@@ -611,12 +611,12 @@ async function main() {
     // ── 13. CLI --version ─────────────────────────────────────────────────
     await runner.run('CLI --version outputs correctly', async () => {
       const output = execSync(`node "${binPath}" --version`, {
+        cwd: tempDir,
         encoding: 'utf8',
-        cwd: projectRoot,
-      });
+      }).trim();
       assert.ok(
-        output.includes('1.7.4'),
-        `--version should output 1.7.4, got: ${output.trim()}`
+        output.includes('1.8.0'),
+        `--version should output 1.8.0, got: ${output}`
       );
     });
 
